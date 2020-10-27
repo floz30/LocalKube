@@ -1,4 +1,4 @@
-package localkube.localkube;
+package fr.umlv.localkube;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
