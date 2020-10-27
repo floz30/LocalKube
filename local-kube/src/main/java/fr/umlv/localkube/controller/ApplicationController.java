@@ -3,22 +3,22 @@ package fr.umlv.localkube.controller;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.repository.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/app/*")
 public class ApplicationController {
     @Autowired
     private ApplicationRepository service;
-    //private final AtomicLong counter = new AtomicLong();
 
     @PostMapping(path="/app/start")
-    public Application start(@RequestBody Application app) {
+    public ResponseEntity<Application> start(@RequestBody Application app) {
         service.save(app);
-        return app;
+        return new ResponseEntity<>(app, HttpStatus.OK);
     }
 
     @GetMapping("/app/list")
@@ -27,8 +27,14 @@ public class ApplicationController {
     }
 
     @PostMapping(path="/app/stop")
-    public void stop(@RequestBody Application app) {
-        var app2 = service.findById(app.getId());
-        // à coder
+    public ResponseEntity<Application> stop() {
+//        var app = service.findById(id);
+//        if (app.isPresent()) {
+//            app.get().setElapsedTime();
+//            service.remove(app.get());
+//            return new ResponseEntity<>(app.get(), HttpStatus.OK);
+//        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+
 }

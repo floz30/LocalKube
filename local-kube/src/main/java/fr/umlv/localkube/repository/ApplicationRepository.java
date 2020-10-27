@@ -4,24 +4,31 @@ import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class ApplicationRepository implements ApplicationService {
-    private List<Application> apps = new ArrayList<>();
-
+    private Map<Long, Application> apps = new HashMap<>();
+    @Override
     public List<Application> getAll() {
-        return apps;
+        return new ArrayList<>(apps.values());
     }
 
     @Override
     public Optional<Application> findById(long id) {
-        return apps.stream().filter(a -> a.getId() == id).findFirst();
+        return Optional.of(apps.get(id));
     }
 
+    @Override
     public void save(Application app) {
-        apps.add(app);
+        apps.put(app.getId(), app);
+    }
+
+    public void remove(Application app) {
+        apps.remove(app.getId());
+    }
+
+    public long getMaxId() {
+        return apps.keySet().stream().mapToLong(a -> a).max().orElse(0);
     }
 }
