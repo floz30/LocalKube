@@ -1,34 +1,36 @@
 package fr.umlv.localkube.model;
 
-import com.fasterxml.jackson.annotation.*;
-
 import java.util.Calendar;
 import java.util.Objects;
 
-@JsonPropertyOrder({"id", "app", "portApp", "portService", "dockerInstance", "elapsedTime"})
 public class Application  {
     private static int COUNTER = 0;
     private final long startTime = System.currentTimeMillis();
-
     private final int id;
     private final String app; // nom de l'application
-    @JsonProperty("port")
     private final int portApp; // port de l'application
-    @JsonProperty("port-service")
     private final int portService; // port de discussion avec LocalKube
-    @JsonProperty(value="docker-instance")
     private final String dockerInstance; // nom de l'instance du conteneur docker
-    @JsonProperty(value="elapsed-time")
-    private String elapsedTime = "0s";
 
-    @JsonCreator(mode= JsonCreator.Mode.PROPERTIES)
-    public Application(@JsonProperty("app") String app) {
-        Objects.requireNonNull(app);
-        this.app = app;
+    public Application(ApplicationStartRecord applicationStartRecord) {
+        Objects.requireNonNull(applicationStartRecord.app());
+        this.app = applicationStartRecord.app();
         this.id = ++COUNTER;
         this.portApp = getPortFromName(app);
         this.portService = 0;
         this.dockerInstance = "nom docker";
+    }
+
+    public ApplicationRecord toApplicationRecord(){
+        return new ApplicationRecord(id,app,portApp,portService,dockerInstance,getElapsedTime());
+    }
+
+    public ApplicationStartRecord toApplicationStartRecord(){
+        return new ApplicationStartRecord(id,app,portApp,portService,dockerInstance);
+    }
+
+    public int getId() {
+        return id;
     }
 
     private int getPortFromName(String name) {
@@ -37,33 +39,14 @@ public class Application  {
         return Integer.parseInt(strPort);
     }
 
-    public void setElapsedTime() {
-        elapsedTime = formatElapsedTime(System.currentTimeMillis());
+    private String getElapsedTime() {
+        return formatElapsedTime(System.currentTimeMillis());
     }
 
     private String formatElapsedTime(long endTime) {
         var calendar = Calendar.getInstance();
         calendar.setTimeInMillis(endTime - startTime);
-        return "" + calendar.get(Calendar.MINUTE) + "m" + calendar.get(Calendar.SECOND) + "s";
-    }
-
-    public int getId() {
-        return id;
-    }
-    public String getApp() {
-        return app;
-    }
-    public int getPortApp() {
-        return portApp;
-    }
-    public int getPortService() {
-        return portService;
-    }
-    public String getDockerInstance() {
-        return dockerInstance;
-    }
-    public String getElapsedTime() {
-        return elapsedTime;
+        return calendar.get(Calendar.MINUTE) + "m" + calendar.get(Calendar.SECOND) + "s";
     }
 
     @Override
@@ -85,7 +68,7 @@ public class Application  {
                 ", port=" + portApp +
                 ", service-port=" + portService +
                 ", docker-instance='" + dockerInstance + '\'' +
-                ", elapsed-time='" + elapsedTime + '\'' +
+                ", elapsed-time='" + getElapsedTime() + '\'' +
                 '}';
     }
 }

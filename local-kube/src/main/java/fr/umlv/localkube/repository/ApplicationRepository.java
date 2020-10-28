@@ -1,20 +1,21 @@
 package fr.umlv.localkube.repository;
 
 import fr.umlv.localkube.model.Application;
+import fr.umlv.localkube.model.ApplicationRecord;
+import fr.umlv.localkube.model.ApplicationStartRecord;
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ApplicationRepository implements ApplicationService {
     private final Map<Integer, Application> apps = new HashMap<>();
 
     @Override
-    public List<Application> getAll() {
-        var list = new ArrayList<>(apps.values());
-        list.forEach(Application::setElapsedTime);
-        return list;
+    public List<ApplicationRecord> getAll() {
+        return apps.values().stream().map(app -> app.toApplicationRecord()).collect(Collectors.toList());
     }
 
     @Override
@@ -23,8 +24,10 @@ public class ApplicationRepository implements ApplicationService {
     }
 
     @Override
-    public void save(Application app) {
-        apps.put(app.getId(), app);
+    public ApplicationStartRecord save(ApplicationStartRecord app) {
+        var application = new Application(app);
+        apps.put(application.getId(), application);
+        return application.toApplicationStartRecord();
     }
 
     public void remove(Application app) {
