@@ -7,6 +7,6 @@ import java.util.Optional;
 
 public interface ApplicationService {
     List<Application> getAll();
-    Optional<Application> findById(long id);
+    Optional<Application> findById(int id);
     void save(Application app);
 }

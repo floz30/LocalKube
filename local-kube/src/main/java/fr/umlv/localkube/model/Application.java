@@ -7,9 +7,10 @@ import java.util.Objects;
 
 @JsonPropertyOrder({"id", "app", "portApp", "portService", "dockerInstance", "elapsedTime"})
 public class Application  {
-    private static long COUNTER = 0;
+    private static int COUNTER = 0;
     private final long startTime = System.currentTimeMillis();
-    private final long id;
+
+    private final int id;
     private final String app; // nom de l'application
     @JsonProperty("port")
     private final int portApp; // port de l'application
@@ -18,7 +19,7 @@ public class Application  {
     @JsonProperty(value="docker-instance")
     private final String dockerInstance; // nom de l'instance du conteneur docker
     @JsonProperty(value="elapsed-time")
-    private String elapsedTime;
+    private String elapsedTime = "0s";
 
     @JsonCreator(mode= JsonCreator.Mode.PROPERTIES)
     public Application(@JsonProperty("app") String app) {
@@ -28,7 +29,6 @@ public class Application  {
         this.portApp = getPortFromName(app);
         this.portService = 0;
         this.dockerInstance = "nom docker";
-        setElapsedTime(); // a revoir
     }
 
     private int getPortFromName(String name) {
@@ -47,7 +47,7 @@ public class Application  {
         return "" + calendar.get(Calendar.MINUTE) + "m" + calendar.get(Calendar.SECOND) + "s";
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
     public String getApp() {

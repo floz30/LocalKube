@@ -8,15 +8,18 @@ import java.util.*;
 
 @Repository
 public class ApplicationRepository implements ApplicationService {
-    private Map<Long, Application> apps = new HashMap<>();
+    private final Map<Integer, Application> apps = new HashMap<>();
+
     @Override
     public List<Application> getAll() {
-        return new ArrayList<>(apps.values());
+        var list = new ArrayList<>(apps.values());
+        list.forEach(Application::setElapsedTime);
+        return list;
     }
 
     @Override
-    public Optional<Application> findById(long id) {
-        return Optional.of(apps.get(id));
+    public Optional<Application> findById(int id) {
+        return Optional.ofNullable(apps.get(id));
     }
 
     @Override
@@ -28,7 +31,7 @@ public class ApplicationRepository implements ApplicationService {
         apps.remove(app.getId());
     }
 
-    public long getMaxId() {
-        return apps.keySet().stream().mapToLong(a -> a).max().orElse(0);
+    public int getMaxId() {
+        return apps.keySet().stream().mapToInt(a -> a).max().orElse(0);
     }
 }

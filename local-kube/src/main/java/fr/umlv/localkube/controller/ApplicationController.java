@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/app/*")
@@ -27,13 +28,15 @@ public class ApplicationController {
     }
 
     @PostMapping(path="/app/stop")
-    public ResponseEntity<Application> stop() {
-//        var app = service.findById(id);
-//        if (app.isPresent()) {
-//            app.get().setElapsedTime();
-//            service.remove(app.get());
-//            return new ResponseEntity<>(app.get(), HttpStatus.OK);
-//        }
+    public ResponseEntity<Application> stop(@RequestBody Map<String, Object> content) {
+        var id = (int)content.get("id");
+        var app = service.findById(id);
+        if (app.isPresent()) {
+            var appFind = app.get();
+            appFind.setElapsedTime();
+            service.remove(appFind);
+            return new ResponseEntity<>(appFind, HttpStatus.OK);
+        }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
