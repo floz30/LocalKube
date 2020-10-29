@@ -25,12 +25,12 @@ public class ApplicationRepository implements ApplicationService {
 
     @Override
     public ApplicationDataRecord save(Application app) {
-        app.putInMap(apps);
+        apps.put(app.getId(),app);
         return app.toApplicationStartRecord();
     }
 
     public void remove(Application app) {
-        app.removeFromMap(apps);
+        apps.remove(app.getId());
     }
 
     public int getMaxId() {

@@ -30,12 +30,8 @@ public class Application  {
         return new ApplicationDataRecord(id,app,portApp,portService,dockerInstance);
     }
 
-    public void putInMap(Map<Integer,Application> apps){
-        apps.put(id,this);
-    }
-
-    public void removeFromMap(Map<Integer,Application> apps){
-        apps.remove(id);
+    public int getId() {
+        return id;
     }
 
     private int getPortFromName(String name) {
