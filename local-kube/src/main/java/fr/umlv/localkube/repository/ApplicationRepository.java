@@ -2,7 +2,7 @@ package fr.umlv.localkube.repository;
 
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.model.ApplicationRecord;
-import fr.umlv.localkube.model.ApplicationStartRecord;
+import fr.umlv.localkube.model.ApplicationDataRecord;
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.stereotype.Repository;
 
@@ -24,14 +24,13 @@ public class ApplicationRepository implements ApplicationService {
     }
 
     @Override
-    public ApplicationStartRecord save(ApplicationStartRecord app) {
-        var application = new Application(app);
-        apps.put(application.getId(), application);
-        return application.toApplicationStartRecord();
+    public ApplicationDataRecord save(Application app) {
+        app.putInMap(apps);
+        return app.toApplicationStartRecord();
     }
 
     public void remove(Application app) {
-        apps.remove(app.getId());
+        app.removeFromMap(apps);
     }
 
     public int getMaxId() {
