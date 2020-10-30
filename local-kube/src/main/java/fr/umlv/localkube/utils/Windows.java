@@ -6,4 +6,9 @@ public class Windows implements OperatingSystem {
     public String getSeparator() {
         return "\\\\";
     }
+
+    @Override
+    public String getCMD() {
+        return "cmd.exe";
+    }
 }

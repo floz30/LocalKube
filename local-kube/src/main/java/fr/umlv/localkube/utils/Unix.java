@@ -6,4 +6,9 @@ public class Unix implements OperatingSystem {
     public String getSeparator() {
         return "/";
     }
+
+    @Override
+    public String getCMD() {
+        return "bash";
+    }
 }

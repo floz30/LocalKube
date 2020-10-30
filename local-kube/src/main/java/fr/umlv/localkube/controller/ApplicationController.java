@@ -32,8 +32,7 @@ public class ApplicationController {
 
     @PostMapping(path="/app/start")
     public ResponseEntity<ApplicationDataRecord> start(@RequestBody ApplicationDataRecord app) {
-        // on check si l'image docker existe déjà dans /docker-images
-        var appName = app.app().split(":")[0]; // à mettre dans une méthode
+        var appName = app.getAppName();
 
         if (dockerManager.checkIfJarFileExists(appName + ".jar")) {
             if (dockerManager.checkIfDockerImageExists(appName)) {
