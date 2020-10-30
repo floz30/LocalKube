@@ -15,13 +15,16 @@ import java.util.concurrent.ExecutionException;
 @RestController
 public class LocalKubeApplication {
 
-    public static void main(String[] args) throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
+    public static void main(String[] args) {
         SpringApplication.run(LocalKubeApplication.class, args);
+        //buildDockerImage();
     }
 
     private static void buildDockerImage() throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
         //JavaContainerBuilder.from("openjdk:15").addProjectDependencies(Paths.get("target/demo-0.0.1-SNAPSHOT.jar")).toContainerBuilder().containerize(Containerizer.to(DockerDaemonImage.named("demobox")));
-        Jib.from("openjdk:15").addLayer(Arrays.asList(Paths.get("../apps/demo-0.0.1-SNAPSHOT.jar")), AbsoluteUnixPath.get("/")).setEntrypoint("java","--enable-preview","-jar","demo-0.0.1-SNAPSHOT.jar")
+        Jib.from("openjdk:15")
+                .addLayer(Arrays.asList(Paths.get("../apps/demo-0.0.1-SNAPSHOT.jar")), AbsoluteUnixPath.get("/"))
+                .setEntrypoint("java","--enable-preview","-jar","demo-0.0.1-SNAPSHOT.jar")
                 .containerize(Containerizer.to(TarImage.at(Paths.get("../docker-images/demo")).named("demo")));
     }
 }

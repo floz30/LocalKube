@@ -15,7 +15,7 @@ public class ApplicationRepository implements ApplicationService {
 
     @Override
     public List<ApplicationRecord> getAll() {
-        return apps.values().stream().map(app -> app.toApplicationRecord()).collect(Collectors.toList());
+        return apps.values().stream().map(Application::toApplicationRecord).collect(Collectors.toList());
     }
 
     @Override
