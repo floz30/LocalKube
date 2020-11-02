@@ -2,9 +2,11 @@ package fr.umlv.localkube;
 
 import com.google.cloud.tools.jib.api.*;
 import com.google.cloud.tools.jib.api.buildplan.AbsoluteUnixPath;
+import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.utils.OperatingSystem;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,32 +24,45 @@ public class DockerManager {
         this.os = os;
     }
 
-    public void createContainer(String jarFilename, String imageName) throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
+    public void start(Application application) throws IOException, RegistryException, InterruptedException, ExecutionException, CacheDirectoryCreationException, InvalidImageReferenceException {
+        if (checkIfJarFileExists(application)) {
+
+            if (!checkIfDockerImageExists(application)) { //vérifier le port auquel l'image est liée
+                createContainer(application);
+            }
+            loadImage(application);
+            runDockerImage(application);
+            return;
+        }
+        throw new FileNotFoundException();
+    }
+
+    public void createContainer(Application application) throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
         Jib.from("openjdk:15")
-            .addLayer(Arrays.asList(getPathToJarFile(jarFilename)), AbsoluteUnixPath.get("/"))
-            .setEntrypoint("java", "--enable-preview", "-jar", jarFilename)
-            .containerize(Containerizer.to(TarImage.at(getPathToDockerImage(imageName)).named(imageName)));
+                .addLayer(Arrays.asList(getPathToJarFile(application.getJarName())), AbsoluteUnixPath.get("/"))
+                .setEntrypoint("java", "--enable-preview", "-jar", application.getJarName(), "--server.port=" + application.getPort())
+                .containerize(Containerizer.to(TarImage.at(getPathToDockerImage(application.getName())).named(application.getName())));
     }
 
-    public boolean checkIfDockerImageExists(String imageName) {
-        return Files.exists(getPathToDockerImage(imageName));
+    public boolean checkIfDockerImageExists(Application application) {
+        return Files.exists(getPathToDockerImage(application.getName()));
     }
 
-    public boolean checkIfJarFileExists(String jarFilename) {
-        return Files.exists(getPathToJarFile(jarFilename));
+    public boolean checkIfJarFileExists(Application application) {
+        return Files.exists(getPathToJarFile(application.getJarName()));
     }
 
-    public void loadImage(String imageName) throws IOException {
+    public void loadImage(Application application) throws IOException {
         var loadCommand = new ProcessBuilder();
-        loadCommand.command(os.getCMD(), "docker load < " + imageName);
-        loadCommand.directory(new File("." + os.getSeparator() + dockerImagesDirectoryName)); // on se place dans le répertoire des images
+        loadCommand.command(os.getCMD(), os.getOption(), "docker load < " + application.getName());
+        loadCommand.directory(new File(os.getParent() + os.getSeparator() + dockerImagesDirectoryName)); // on se place dans le répertoire des images
         loadCommand.start();
     }
 
-    public void runDockerImage(String imageName, int port) throws IOException {
+    public void runDockerImage(Application application) throws IOException {
         var loadCommand = new ProcessBuilder();
-        loadCommand.command(os.getCMD(), "docker run -p " + port + ":" + port + " " + imageName);
-        loadCommand.directory(new File("." + os.getSeparator() + dockerImagesDirectoryName)); // on se place dans le répertoire des images
+        loadCommand.command(os.getCMD(), os.getOption(), "docker run -p " + application.getPort() + ":" + application.getPort() + " " + application.getName() + " &");
+        //voir à donner un nom au container pour pouvoir faire "docker stop name"
         loadCommand.start();
     }
 
@@ -56,14 +71,10 @@ public class DockerManager {
     }
 
     private Path getPathToJarFile(String jarFilename) {
-        // le "." à vérifier pour unix
-        return Paths.get(String.join(os.getSeparator(), ".", jarDirectoryName, jarFilename));
-        //return Paths.get(String.format(".%s%s%s%s", os.getSeparator(), jarDirectoryName, os.getSeparator(), jarFilename));
+        return Paths.get(String.join(os.getSeparator(), os.getParent(), jarDirectoryName, jarFilename));
     }
 
     private Path getPathToDockerImage(String imageName) {
-        // le "." à vérifier pour unix
-        return Paths.get(String.join(os.getSeparator(), ".", dockerImagesDirectoryName, imageName));
-        //return Paths.get(String.format(".%s%s%s%s", os.getSeparator(), dockerImagesDirectoryName, os.getSeparator(), imageName));
+        return Paths.get(String.join(os.getSeparator(), os.getParent(), dockerImagesDirectoryName, imageName));
     }
 }

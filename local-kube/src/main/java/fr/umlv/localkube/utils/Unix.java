@@ -11,4 +11,14 @@ public class Unix implements OperatingSystem {
     public String getCMD() {
         return "bash";
     }
+
+    @Override
+    public String getParent() {
+        return "..";
+    }
+
+    @Override
+    public String getOption() {
+        return "-c";
+    }
 }

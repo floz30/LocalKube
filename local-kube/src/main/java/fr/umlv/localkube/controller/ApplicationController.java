@@ -1,8 +1,5 @@
 package fr.umlv.localkube.controller;
 
-import com.google.cloud.tools.jib.api.CacheDirectoryCreationException;
-import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
-import com.google.cloud.tools.jib.api.RegistryException;
 import fr.umlv.localkube.DockerManager;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.model.ApplicationDataRecord;
@@ -13,10 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/app/*")
@@ -25,34 +19,20 @@ public class ApplicationController {
     private final ApplicationRepository service;
     private final DockerManager dockerManager;
 
-    public ApplicationController(ApplicationRepository service){
+    public ApplicationController(ApplicationRepository service) {
         this.service = service;
         this.dockerManager = new DockerManager(OperatingSystem.checkOS());
     }
 
-    @PostMapping(path="/app/start")
-    public ResponseEntity<ApplicationDataRecord> start(@RequestBody ApplicationDataRecord app) {
-        var appName = app.getAppName();
-
-        if (dockerManager.checkIfJarFileExists(appName + ".jar")) {
-            if (dockerManager.checkIfDockerImageExists(appName)) {
-                // si oui on l'utilise pour lancer le jar
-            }
-            else {
-                // sinon on le créé
-                try {
-                    dockerManager.createContainer(appName + ".jar", appName);
-                } catch (Exception e) { // exception à traiter, ici juste pour des tests
-                    e.printStackTrace();
-                }
-            }
-        }
-        else {
+    @PostMapping(path = "/app/start")
+    public ResponseEntity<ApplicationDataRecord> start(@RequestBody ApplicationDataRecord data) {
+        var application = new Application(data);
+        try {
+            dockerManager.start(application);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            //throw new FileNotFoundException();
         }
-
-        return new ResponseEntity<>(service.save(new Application(app)), HttpStatus.OK);
+        return new ResponseEntity<>(service.save(application), HttpStatus.OK);
     }
 
     @GetMapping("/app/list")
@@ -60,16 +40,15 @@ public class ApplicationController {
         return service.getAll();
     }
 
-    @PostMapping(path="/app/stop")
-    public ResponseEntity<ApplicationRecord> stop(@RequestBody ApplicationDataRecord app) {
-        var id = app.id();
+    @PostMapping(path = "/app/stop")
+    public ResponseEntity<ApplicationRecord> stop(@RequestBody ApplicationDataRecord data) {
+        var id = data.id();
         var application = service.findById(id);
         if (application.isPresent()) {
-            var appFound = application.orElseThrow();
+            var appFound = application.get();
             service.remove(appFound);
             return new ResponseEntity<>(appFound.toApplicationRecord(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
-
 }

@@ -11,4 +11,14 @@ public class Windows implements OperatingSystem {
     public String getCMD() {
         return "cmd.exe";
     }
+
+    @Override
+    public String getParent() {
+        return ".";
+    }
+
+    @Override
+    public String getOption() {
+        return "/c";
+    }
 }
