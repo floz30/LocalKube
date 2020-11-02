@@ -1,10 +1,9 @@
 package fr.umlv.localkube.model;
 
 import java.util.Calendar;
-import java.util.Map;
 import java.util.Objects;
 
-public class Application  {
+public class Application {
     private static int COUNTER = 0;
     private final long startTime = System.currentTimeMillis();
     private final int id;
@@ -17,25 +16,37 @@ public class Application  {
         Objects.requireNonNull(applicationDataRecord.app());
         this.app = applicationDataRecord.app();
         this.id = ++COUNTER;
-        this.portApp = getPortFromName(app);
+        this.portApp = getPortFromName();
         this.portService = 0;
         this.dockerInstance = "nom docker";
     }
 
-    public ApplicationRecord toApplicationRecord(){
-        return new ApplicationRecord(id,app,portApp,portService,dockerInstance,getElapsedTime());
+    public ApplicationRecord toApplicationRecord() {
+        return new ApplicationRecord(id, app, portApp, portService, dockerInstance, getElapsedTime());
     }
 
-    public ApplicationDataRecord toApplicationStartRecord(){
-        return new ApplicationDataRecord(id,app,portApp,portService,dockerInstance);
+    public ApplicationDataRecord toApplicationStartRecord() {
+        return new ApplicationDataRecord(id, app, portApp, portService, dockerInstance);
+    }
+
+    public String getJarName() {
+        return getName() + ".jar";
     }
 
     public int getId() {
         return id;
     }
 
-    private int getPortFromName(String name) {
-        var strPort = name.split(":")[1];
+    public String getName() {
+        return app.split(":")[0];
+    }
+
+    public int getPort() {
+        return portApp;
+    }
+
+    private int getPortFromName() {
+        var strPort = app.split(":")[1];
         return Integer.parseInt(strPort);
     }
 
