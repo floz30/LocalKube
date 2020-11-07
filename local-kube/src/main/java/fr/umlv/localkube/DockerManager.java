@@ -25,9 +25,8 @@ public class DockerManager {
     }
 
     public void start(Application application) throws IOException, RegistryException, InterruptedException, ExecutionException, CacheDirectoryCreationException, InvalidImageReferenceException {
-        if (checkIfJarFileExists(application)) {
-
-            if (!checkIfDockerImageExists(application)) { //vérifier le port auquel l'image est liée
+        if (checksIfJarFileExists(application)) {
+            if (!checksIfDockerImageExists(application)) { //vérifier le port auquel l'image est liée
                 createContainer(application);
             }
             loadImage(application);
@@ -44,14 +43,30 @@ public class DockerManager {
                 .containerize(Containerizer.to(TarImage.at(getPathToDockerImage(application.getName())).named(application.getName())));
     }
 
-    public boolean checkIfDockerImageExists(Application application) {
+    /**
+     * Checks if a docker image with specified name already exists in /docker-images/ directory.
+     * @param application Initialized application.
+     * @return true if image exists otherwise false.
+     */
+    public boolean checksIfDockerImageExists(Application application) {
         return Files.exists(getPathToDockerImage(application.getName()));
     }
 
-    public boolean checkIfJarFileExists(Application application) {
+    /**
+     * Checks if a jar file with specified name already exists in /apps/ directory.
+     * @param application Initialized application.
+     * @return true if file exists otherwise false.
+     */
+    public boolean checksIfJarFileExists(Application application) {
         return Files.exists(getPathToJarFile(application.getJarName()));
     }
 
+    /**
+     * Load an image from a file in /docker-images/ directory.
+     * The image name is the application's name.
+     * @param application Initialized application.
+     * @throws IOException If an I/O error occurs.
+     */
     public void loadImage(Application application) throws IOException {
         var loadCommand = new ProcessBuilder();
         loadCommand.command(os.getCMD(), os.getOption(), "docker load < " + application.getName());
@@ -60,13 +75,27 @@ public class DockerManager {
     }
 
     public void runDockerImage(Application application) throws IOException {
-        var loadCommand = new ProcessBuilder();
-        loadCommand.command(os.getCMD(), os.getOption(), "docker run -p " + application.getPort() + ":" + application.getPort() + " " + application.getName() + " &");
-        //voir à donner un nom au container pour pouvoir faire "docker stop name"
-        loadCommand.start();
+        var runCommand = new ProcessBuilder();
+        runCommand.command(os.getCMD(), os.getOption(), "docker run -d -p " + application.getPort() + ":" + application.getPort() + " --name " + application.getDockerInstance() + " " + application.getName());
+        // permet de rediriger input/ouput/error dans celui du programme local-kube
+        // avec l'option -d on affiche le container ID à stocker dans l'objet application
+        // à voir si on peut pas le récupérer autrement que de l'afficher dans la sortie standard
+        runCommand.inheritIO();
+        runCommand.start();
     }
 
-    public void stopDockerImage() {
+    /**
+     * Stops container thanks to his name.
+     * @param application Application that must be stopped.
+     * @throws IOException If an I/O error occurs.
+     */
+    public void stopContainer(Application application) throws IOException {
+        var stopCommand = new ProcessBuilder();
+        stopCommand.command(os.getCMD(), os.getOption(), "docker stop " + application.getDockerInstance());
+        stopCommand.start();
+    }
+
+    public void listAllContainers() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 

@@ -18,7 +18,7 @@ public class Application {
         this.id = ++COUNTER;
         this.portApp = getPortFromName();
         this.portService = 0;
-        this.dockerInstance = "nom docker";
+        this.dockerInstance = getName() + "_" + portApp;
     }
 
     public ApplicationRecord toApplicationRecord() {
@@ -48,6 +48,10 @@ public class Application {
     private int getPortFromName() {
         var strPort = app.split(":")[1];
         return Integer.parseInt(strPort);
+    }
+
+    public String getDockerInstance() {
+        return dockerInstance;
     }
 
     private String getElapsedTime() {

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -30,7 +31,7 @@ public class ApplicationController {
         try {
             dockerManager.start(application);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(service.save(application), HttpStatus.OK);
     }
@@ -46,9 +47,15 @@ public class ApplicationController {
         var application = service.findById(id);
         if (application.isPresent()) {
             var appFound = application.get();
+            try {
+                dockerManager.stopContainer(appFound);
+            } catch (IOException ioe) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
             service.remove(appFound);
             return new ResponseEntity<>(appFound.toApplicationRecord(), HttpStatus.OK);
         }
+
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }
