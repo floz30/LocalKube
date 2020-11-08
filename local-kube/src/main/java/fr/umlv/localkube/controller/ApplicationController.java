@@ -26,14 +26,14 @@ public class ApplicationController {
     }
 
     @PostMapping(path = "/app/start")
-    public ResponseEntity<ApplicationDataRecord> start(@RequestBody ApplicationDataRecord data) {
+    public ResponseEntity start(@RequestBody ApplicationDataRecord data) {
         var application = new Application(data);
         try {
             dockerManager.start(application);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) { //changer pour réussir à renvoyer une exception
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e);
         }
-        return new ResponseEntity<>(service.save(application), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(service.save(application));
     }
 
     @GetMapping("/app/list")
@@ -49,7 +49,7 @@ public class ApplicationController {
             var appFound = application.get();
             try {
                 dockerManager.stopContainer(appFound);
-            } catch (IOException ioe) {
+            } catch (IOException | InterruptedException ioe) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             service.remove(appFound);

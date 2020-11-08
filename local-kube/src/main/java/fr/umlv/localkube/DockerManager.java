@@ -26,20 +26,19 @@ public class DockerManager {
 
     public void start(Application application) throws IOException, RegistryException, InterruptedException, ExecutionException, CacheDirectoryCreationException, InvalidImageReferenceException {
         if (checksIfJarFileExists(application)) {
-            if (!checksIfDockerImageExists(application)) { //vérifier le port auquel l'image est liée
-                createContainer(application);
+            if (!checksIfDockerImageExists(application)) {
+                createImage(application);
+                loadImage(application);
             }
-            loadImage(application);
             runDockerImage(application);
             return;
         }
         throw new FileNotFoundException();
     }
 
-    public void createContainer(Application application) throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
+    public void createImage(Application application) throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
         Jib.from("openjdk:15")
                 .addLayer(Arrays.asList(getPathToJarFile(application.getJarName())), AbsoluteUnixPath.get("/"))
-                .setEntrypoint("java", "--enable-preview", "-jar", application.getJarName(), "--server.port=" + application.getPort())
                 .containerize(Containerizer.to(TarImage.at(getPathToDockerImage(application.getName())).named(application.getName())));
     }
 
@@ -67,21 +66,30 @@ public class DockerManager {
      * @param application Initialized application.
      * @throws IOException If an I/O error occurs.
      */
-    public void loadImage(Application application) throws IOException {
+    public void loadImage(Application application) throws IOException, InterruptedException {
         var loadCommand = new ProcessBuilder();
         loadCommand.command(os.getCMD(), os.getOption(), "docker load < " + application.getName());
         loadCommand.directory(new File(os.getParent() + os.getSeparator() + dockerImagesDirectoryName)); // on se place dans le répertoire des images
-        loadCommand.start();
+        loadCommand.inheritIO();
+        if (loadCommand.start().waitFor()!=0){ //réussir à rediriger l'erreur sous forme d'exception
+            throw new IOException("load command failed");
+        }
+
     }
 
-    public void runDockerImage(Application application) throws IOException {
+    public void runDockerImage(Application application) throws IOException, InterruptedException {
         var runCommand = new ProcessBuilder();
-        runCommand.command(os.getCMD(), os.getOption(), "docker run -d -p " + application.getPort() + ":" + application.getPort() + " --name " + application.getDockerInstance() + " " + application.getName());
+        System.out.println(application.getDockerInstance());
+        runCommand.command( os.getCMD(),
+                            os.getOption(),
+                            "docker run --entrypoint java -d -p " + application.getPort() + ":" + application.getPort() + " --name "  + application.getDockerInstance() + " " + application.getName() + " --enable-preview -jar demo.jar --server.port=" + application.getPort());
         // permet de rediriger input/ouput/error dans celui du programme local-kube
         // avec l'option -d on affiche le container ID à stocker dans l'objet application
         // à voir si on peut pas le récupérer autrement que de l'afficher dans la sortie standard
         runCommand.inheritIO();
-        runCommand.start();
+        if (runCommand.start().waitFor()!=0){ //réussir à rediriger l'erreur sous forme d'exception
+            throw new IOException("run command failed");
+        }
     }
 
     /**
@@ -89,10 +97,13 @@ public class DockerManager {
      * @param application Application that must be stopped.
      * @throws IOException If an I/O error occurs.
      */
-    public void stopContainer(Application application) throws IOException {
+    public void stopContainer(Application application) throws IOException, InterruptedException {
         var stopCommand = new ProcessBuilder();
         stopCommand.command(os.getCMD(), os.getOption(), "docker stop " + application.getDockerInstance());
-        stopCommand.start();
+        stopCommand.inheritIO();
+        if (stopCommand.start().waitFor()!=0){ //réussir à rediriger l'erreur sous forme d'exception
+            throw new IOException("stop command failed");
+        }
     }
 
     public void listAllContainers() {
