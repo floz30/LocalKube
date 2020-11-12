@@ -36,6 +36,16 @@ public class DockerManager {
         throw new FileNotFoundException();
     }
 
+    /**
+     * Create a new docker image
+     * @param application Initialized application
+     * @throws IOException
+     * @throws InvalidImageReferenceException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws RegistryException
+     * @throws CacheDirectoryCreationException
+     */
     public void createImage(Application application) throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
         Jib.from("openjdk:15")
                 .addLayer(Arrays.asList(getPathToJarFile(application.getJarName())), AbsoluteUnixPath.get("/"))
@@ -44,8 +54,8 @@ public class DockerManager {
 
     /**
      * Checks if a docker image with specified name already exists in /docker-images/ directory.
-     * @param application Initialized application.
-     * @return true if image exists otherwise false.
+     * @param application Initialized application
+     * @return true if image exists otherwise false
      */
     public boolean checksIfDockerImageExists(Application application) {
         return Files.exists(getPathToDockerImage(application.getName()));
@@ -53,8 +63,8 @@ public class DockerManager {
 
     /**
      * Checks if a jar file with specified name already exists in /apps/ directory.
-     * @param application Initialized application.
-     * @return true if file exists otherwise false.
+     * @param application Initialized application
+     * @return true if file exists otherwise false
      */
     public boolean checksIfJarFileExists(Application application) {
         return Files.exists(getPathToJarFile(application.getJarName()));
@@ -62,9 +72,9 @@ public class DockerManager {
 
     /**
      * Load an image from a file in /docker-images/ directory.
-     * The image name is the application's name.
-     * @param application Initialized application.
-     * @throws IOException If an I/O error occurs.
+     * The image name is the application's name
+     * @param application Initialized application
+     * @throws IOException If an I/O error occurs
      */
     public void loadImage(Application application) throws IOException, InterruptedException {
         var loadCommand = new ProcessBuilder();
@@ -77,6 +87,12 @@ public class DockerManager {
 
     }
 
+    /**
+     * Run a docker on specified port.
+     * @param application Initialized application
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void runDockerImage(Application application) throws IOException, InterruptedException {
         var runCommand = new ProcessBuilder();
         System.out.println(application.getDockerInstance());
@@ -94,8 +110,8 @@ public class DockerManager {
 
     /**
      * Stops container thanks to his name.
-     * @param application Application that must be stopped.
-     * @throws IOException If an I/O error occurs.
+     * @param application Application that must be stopped
+     * @throws IOException If an I/O error occurs
      */
     public void stopContainer(Application application) throws IOException, InterruptedException {
         var stopCommand = new ProcessBuilder();
@@ -110,10 +126,20 @@ public class DockerManager {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
+    /**
+     * Build and return path to specified jar file.
+     * @param jarFilename String containing jar filename
+     * @return the resulting path
+     */
     private Path getPathToJarFile(String jarFilename) {
         return Paths.get(String.join(os.getSeparator(), os.getParent(), jarDirectoryName, jarFilename));
     }
 
+    /**
+     * Build and return path to specified docker image.
+     * @param imageName String containing docker image name
+     * @return the resulting path
+     */
     private Path getPathToDockerImage(String imageName) {
         return Paths.get(String.join(os.getSeparator(), os.getParent(), dockerImagesDirectoryName, imageName));
     }

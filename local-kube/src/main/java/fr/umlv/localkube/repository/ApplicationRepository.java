@@ -6,10 +6,7 @@ import fr.umlv.localkube.model.ApplicationRecord;
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
@@ -28,11 +25,16 @@ public class ApplicationRepository implements ApplicationService {
 
     @Override
     public ApplicationDataRecord save(Application app) {
+        Objects.requireNonNull(app);
         apps.put(app.getId(), app);
         return app.toApplicationStartRecord();
     }
 
     public void remove(Application app) {
         apps.remove(app.getId());
+    }
+
+    public int size() {
+        return apps.size();
     }
 }
