@@ -12,5 +12,7 @@ public interface ApplicationService {
 
     Optional<Application> findById(int id);
 
+    Application findByPort(int port);
+
     ApplicationDataRecord save(Application app);
 }

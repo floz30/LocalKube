@@ -41,7 +41,15 @@ public class Application {
         return app.split(":")[0];
     }
 
-    public int getPort() {
+    public String getApp() {
+        return app;
+    }
+
+    public int getPortService() {
+        return portService;
+    }
+
+    public int getPortApp() {
         return portApp;
     }
 

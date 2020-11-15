@@ -1,9 +1,7 @@
 package fr.umlv.localkube.controller;
 
-import fr.umlv.localkube.DockerManager;
-import fr.umlv.localkube.model.Application;
-import fr.umlv.localkube.model.ApplicationDataRecord;
-import fr.umlv.localkube.model.ApplicationRecord;
+import fr.umlv.localkube.manager.DockerManager;
+import fr.umlv.localkube.model.*;
 import fr.umlv.localkube.repository.ApplicationRepository;
 import fr.umlv.localkube.utils.OperatingSystem;
 import org.springframework.http.HttpStatus;
@@ -57,5 +55,13 @@ public class ApplicationController {
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping(path = "/app/log")
+    public ResponseEntity<Log> insert(@RequestBody LogDataRecord data) {
+        var application = service.findByPort(data.port());
+        //à modifier en utilisant pour accéder au service de log
+        insertLog(application.getId(), application.getApp(), application.getPortApp(), application.getPortService(), application.getDockerInstance(), data.message(), data.timestamp());
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 }
