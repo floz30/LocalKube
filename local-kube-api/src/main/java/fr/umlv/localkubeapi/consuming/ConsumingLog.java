@@ -1,9 +1,9 @@
 package fr.umlv.localkubeapi.consuming;
 
+import fr.umlv.localkubeapi.model.Log;
 import org.springframework.web.client.RestTemplate;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.sql.Timestamp;
 
 public class ConsumingLog {
 
@@ -14,12 +14,12 @@ public class ConsumingLog {
     }
 
     public void insertLog(String message) {
-        restTemplate.postForEntity("http://localhost:8080/logs/insert", createLog(message), String.class);
+        // numéro de port à revoir
+        restTemplate.postForEntity("http://localhost:8080/log", createLog(message), String.class);
     }
 
-    private LogDataRecord createLog(String message) {
-        //à modifier en trouvant une technique pour trouver le port de l'application qui fait un insert log
-        return new LogDataRecord(message,8081,new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss:SSS'Z'").format(Calendar.getInstance().getTime()));
+    private Log createLog(String message) {
+        return new Log(message, new Timestamp(System.currentTimeMillis()));
     }
 
 }
