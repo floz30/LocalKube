@@ -57,11 +57,11 @@ public class ApplicationController {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
-    @PostMapping(path = "/app/log")
+    /*@PostMapping(path = "/app/log")
     public ResponseEntity<Log> insert(@RequestBody LogDataRecord data) {
         var application = service.findByPort(data.port());
         //à modifier en utilisant pour accéder au service de log
         insertLog(application.getId(), application.getApp(), application.getPortApp(), application.getPortService(), application.getDockerInstance(), data.message(), data.timestamp());
         return new ResponseEntity<>(data, HttpStatus.OK);
-    }
+    }*/
 }

@@ -6,6 +6,7 @@ import fr.umlv.localkube.services.LogService;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.util.List;
 
@@ -19,22 +20,27 @@ public class LogRepository implements LogService {
     }
 
     @Override
-    public void insertLog(int id, String app, int port, int servicePort, String dockerInstance, String message,String timestamp) {
-        logManager.insertLog(id, app, port, servicePort, dockerInstance, message,timestamp);
+    public void insertLog(Log log) {
+        // le app_id doit être modifié avant de l'insérer
+        logManager.insertLog(log.app_id(), log.message(), log.timestamp());
     }
 
-    @Override
-    public List<Log> selectAllFromDuration(Duration minutes) {
-        return logManager.selectAllFromDuration(minutes);
+    public List<Log> selectAll() {
+        return logManager.selectAll();
     }
 
-    @Override
-    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
-        return logManager.selectAllFromDurationById(minutes, id);
-    }
-
-    @Override
-    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
-        return logManager.selectAllFromDurationByApp(minutes, app);
-    }
+//    @Override
+//    public List<Log> selectAllFromDuration(Duration minutes) {
+//        return logManager.selectAllFromDuration(minutes);
+//    }
+//
+//    @Override
+//    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
+//        return logManager.selectAllFromDurationById(minutes, id);
+//    }
+//
+//    @Override
+//    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
+//        return logManager.selectAllFromDurationByApp(minutes, app);
+//    }
 }

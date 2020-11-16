@@ -26,7 +26,7 @@ public class ApplicationRepository implements ApplicationService {
     @Override
     public Application findByPort(int port) {
         for(var app : apps.values()){
-            if(app.getPort() == port){
+            if(app.getPortService() == port){
                 return app;
             }
         }
