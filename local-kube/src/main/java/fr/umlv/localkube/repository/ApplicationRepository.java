@@ -24,13 +24,13 @@ public class ApplicationRepository implements ApplicationService {
     }
 
     @Override
-    public Application findByPort(int port) {
+    public int findAppIdByPortService(int portService) {
         for(var app : apps.values()){
-            if(app.getPortService() == port){
-                return app;
+            if(app.getPortService() == portService){
+                return app.getId();
             }
         }
-        throw new IllegalStateException("application map must contains this port :"+port);
+        throw new IllegalStateException("application map must contains this port : "+portService);
     }
 
     @Override

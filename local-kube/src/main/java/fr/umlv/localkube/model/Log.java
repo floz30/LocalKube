@@ -7,7 +7,7 @@ import java.util.Objects;
 
 // see here https://github.com/FasterXML/jackson-future-ideas/issues/46
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record Log(int id, int app_id, String message, Timestamp timestamp) {
+public record Log(Integer appId,String message, Timestamp timestamp) {
     public Log {
         Objects.requireNonNull(message);
         Objects.requireNonNull(timestamp);

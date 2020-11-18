@@ -21,8 +21,7 @@ public class LogRepository implements LogService {
 
     @Override
     public void insertLog(Log log) {
-        // le app_id doit être modifié avant de l'insérer
-        logManager.insertLog(log.app_id(), log.message(), log.timestamp());
+        logManager.insertLog(log.appId(), log.message(), log.timestamp());
     }
 
     public List<Log> selectAll() {

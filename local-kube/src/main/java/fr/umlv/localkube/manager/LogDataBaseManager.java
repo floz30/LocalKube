@@ -39,7 +39,7 @@ public class LogDataBaseManager {
     private static void createTable(Jdbi jdbi) {
         jdbi.withHandle(handle ->
                 handle.execute("CREATE TABLE IF NOT EXISTS log (" +
-                        "id INTEGER PRIMARY KEY, " +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "app_id INTEGER NOT NULL, " +
                         "message TEXT NOT NULL, " +
                         "timestamp DATETIME CURRENT_TIMESTAMP NOT NULL)")
@@ -93,7 +93,7 @@ public class LogDataBaseManager {
 //    }
 
     private Log mapToLog(ResultSet rs, StatementContext ctx) throws SQLException {
-        return new Log(rs.getInt("id"), rs.getInt("app_id"), rs.getString("message"), rs.getTimestamp("timestamp"));
+        return new Log(rs.getInt("app_id"), rs.getString("message"), rs.getTimestamp("timestamp"));
     }
 
 

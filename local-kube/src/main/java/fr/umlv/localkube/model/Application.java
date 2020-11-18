@@ -17,7 +17,7 @@ public class Application {
         this.app = applicationDataRecord.app();
         this.id = ++COUNTER;
         this.portApp = getPortFromName();
-        this.portService = 0;
+        this.portService = 15000;
         this.dockerInstance = getName() + "_" + portApp;
     }
 
