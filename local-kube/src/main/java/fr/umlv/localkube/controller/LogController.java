@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -24,10 +26,13 @@ public class LogController {
     }
 
     @PostMapping("/log")
-    public String addLog(@RequestBody String message) {
-        // service port à trouver dynamiquement
-        service.insertLog(new Log(applicationService.findAppIdByPortService(15000),message,new Timestamp(System.currentTimeMillis())));
-        return "New log add successfully on app : " + applicationService.findAppIdByPortService(15000);
+    public String addLog(HttpServletRequest request, @RequestBody String message) throws IOException {
+        if(request.getLocalPort() == 8080){
+            throw new IOException("Tried to add log on public port 8080");
+        }
+        var id = applicationService.findAppIdByPortService(request.getLocalPort());
+        service.insertLog(new Log(id,message,new Timestamp(System.currentTimeMillis())));
+        return "New log add successfully for application : " + id;
     }
 
     @RequestMapping("/logs")

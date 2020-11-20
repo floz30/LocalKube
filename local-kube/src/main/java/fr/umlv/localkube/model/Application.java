@@ -1,10 +1,14 @@
 package fr.umlv.localkube.model;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.Calendar;
 import java.util.Objects;
 
 public class Application {
     private static int COUNTER = 0;
+    private static int minPortService = 49152;
     private final long startTime = System.currentTimeMillis();
     private final int id;
     private final String app; // nom de l'application
@@ -12,13 +16,30 @@ public class Application {
     private final int portService; // port de discussion avec LocalKube
     private final String dockerInstance; // nom de l'instance du conteneur docker
 
-    public Application(ApplicationDataRecord applicationDataRecord) {
+    public Application(ApplicationDataRecord applicationDataRecord) throws IOException {
         Objects.requireNonNull(applicationDataRecord.app());
         this.app = applicationDataRecord.app();
         this.id = ++COUNTER;
         this.portApp = getPortFromName();
-        this.portService = 15000;
+        this.portService = setPortService();
         this.dockerInstance = getName() + "_" + portApp;
+    }
+
+    public int setPortService() throws IOException {
+        while (minPortService<65536){
+            try {
+                minPortService++;
+                var s = new ServerSocket(minPortService);
+                s.close();
+                break;
+            }catch (IOException e){
+                continue;
+            }
+        }
+        if(minPortService>65535){
+            throw new IOException("no free private port found");
+        }
+        return minPortService;
     }
 
     public ApplicationRecord toApplicationRecord() {

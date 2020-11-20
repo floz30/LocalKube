@@ -3,6 +3,9 @@ package fr.umlv.localkube.repository;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.model.ApplicationDataRecord;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationRepositoryTests {
@@ -15,7 +18,7 @@ public class ApplicationRepositoryTests {
     }
 
     @Test
-    void save_OK() {
+    void save_OK() throws IOException {
         repository.save(new Application(new ApplicationDataRecord(0, "app:8000", 0, 0, "")));
         assertEquals(1, repository.size());
     }

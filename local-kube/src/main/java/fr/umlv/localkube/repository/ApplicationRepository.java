@@ -40,6 +40,10 @@ public class ApplicationRepository implements ApplicationService {
         return app.toApplicationStartRecord();
     }
 
+    public List<Application> applicationList(){
+        return apps.values().stream().collect(Collectors.toList());
+    }
+
     public void remove(Application app) {
         apps.remove(app.getId());
     }

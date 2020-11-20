@@ -14,5 +14,7 @@ public interface ApplicationService {
 
     int findAppIdByPortService(int portService);
 
+    List<Application> applicationList();
+
     ApplicationDataRecord save(Application app);
 }

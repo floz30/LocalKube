@@ -115,7 +115,7 @@ public class DockerManager {
      */
     public void stopContainer(Application application) throws IOException, InterruptedException {
         var stopCommand = new ProcessBuilder();
-        stopCommand.command(os.getCMD(), os.getOption(), "docker stop " + application.getDockerInstance());
+        stopCommand.command(os.getCMD(), os.getOption(), "docker rm -f " + application.getDockerInstance());
         stopCommand.inheritIO();
         if (stopCommand.start().waitFor()!=0){ //réussir à rediriger l'erreur sous forme d'exception
             throw new IOException("stop command failed");
