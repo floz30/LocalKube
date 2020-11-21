@@ -3,7 +3,7 @@ package fr.umlv.localkube.utils;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UnixTests {
+public class UnixTest {
     private final Unix os = new Unix();
 
     @Test

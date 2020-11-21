@@ -17,4 +17,6 @@ public interface ApplicationService {
     List<Application> applicationList();
 
     ApplicationDataRecord save(Application app);
+
+    void remove(Application app);
 }

@@ -4,10 +4,7 @@ import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.ApplicationRepository;
 import fr.umlv.localkube.repository.LogRepository;
 import fr.umlv.localkube.services.ApplicationService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -35,7 +32,7 @@ public class LogController {
         return "New log add successfully for application : " + id;
     }
 
-    @RequestMapping("/logs")
+    @GetMapping("/logs")
     public List<Log> list() {
         return service.selectAll();
     }

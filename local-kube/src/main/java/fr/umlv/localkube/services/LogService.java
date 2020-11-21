@@ -10,6 +10,8 @@ public interface LogService {
 
     void insertLog(Log log);
 
+    List<Log> selectAll();
+
 //    List<Log> selectAllFromDuration(Duration minutes);
 //
 //    List<Log> selectAllFromDurationById(Duration minutes, int id);

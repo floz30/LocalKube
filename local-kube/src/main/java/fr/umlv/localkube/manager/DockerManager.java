@@ -132,7 +132,7 @@ public class DockerManager {
      * @return the resulting path
      */
     private Path getPathToJarFile(String jarFilename) {
-        return Paths.get(String.join(os.getSeparator(), os.getParent(), jarDirectoryName, jarFilename));
+        return Path.of(String.join(os.getSeparator(), os.getParent(), jarDirectoryName, jarFilename));
     }
 
     /**
@@ -141,6 +141,6 @@ public class DockerManager {
      * @return the resulting path
      */
     private Path getPathToDockerImage(String imageName) {
-        return Paths.get(String.join(os.getSeparator(), os.getParent(), dockerImagesDirectoryName, imageName));
+        return Path.of(String.join(os.getSeparator(), os.getParent(), dockerImagesDirectoryName, imageName));
     }
 }

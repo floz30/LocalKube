@@ -40,15 +40,22 @@ public class ApplicationRepository implements ApplicationService {
         return app.toApplicationStartRecord();
     }
 
+    @Override
     public List<Application> applicationList(){
         return apps.values().stream().collect(Collectors.toList());
     }
 
+    @Override
     public void remove(Application app) {
         apps.remove(app.getId());
     }
 
     public int size() {
         return apps.size();
+    }
+
+    @Override
+    public String toString() {
+        return apps.toString();
     }
 }

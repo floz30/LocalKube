@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/app/*")
 public class ApplicationController  {
 
     private final ApplicationRepository service;

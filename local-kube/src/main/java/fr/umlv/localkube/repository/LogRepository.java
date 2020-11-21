@@ -12,7 +12,6 @@ import java.util.List;
 
 @Repository
 public class LogRepository implements LogService {
-
     private final LogDataBaseManager logManager;
 
     public LogRepository() throws IOException {
@@ -24,6 +23,7 @@ public class LogRepository implements LogService {
         logManager.insertLog(log.appId(), log.message(), log.timestamp());
     }
 
+    @Override
     public List<Log> selectAll() {
         return logManager.selectAll();
     }

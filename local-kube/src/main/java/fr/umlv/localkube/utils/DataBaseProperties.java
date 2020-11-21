@@ -1,19 +1,24 @@
 package fr.umlv.localkube.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Properties;
 
 public record DataBaseProperties(String username, String password, String path) {
+
+    /**
+     * Load properties file and get credentials for database.
+     * @return new object initialized
+     * @throws IOException if an error occurred when reading from the input stream
+     */
     public static DataBaseProperties credentialsFromPropertiesFile() throws IOException {
-        try (var file = new FileInputStream(Paths.get("src", File.separator, "main", File.separator, "resources", File.separator, "application.properties").toString())) {
+        try (var file = DataBaseProperties.class.getClassLoader().getResourceAsStream("application.properties")) {
             var properties = new Properties();
             properties.load(file);
             return new DataBaseProperties(properties.getProperty("database.username"),
                     properties.getProperty("database.password"),
-                    Paths.get(Paths.get("").toAbsolutePath().getParent().toString(), Paths.get(File.separator, "logs", File.separator, "logs.db").toString()).toString());
+                    Path.of("logs", File.separator, "logs.db").toAbsolutePath().toString());
         }
     }
 }

@@ -25,18 +25,34 @@ public class Application {
         this.dockerInstance = getName() + "_" + portApp;
     }
 
-    public int setPortService() throws IOException {
-        while (minPortService<65536){
+    /**
+     * Pour des tests unitaires, à voir si on peut faire sans
+     * @param id
+     * @param app
+     * @param portApp
+     * @param portService
+     * @param dockerInstance
+     */
+    public Application(int id, String app, int portApp, int portService, String dockerInstance) {
+        this.id = id;
+        this.app = app;
+        this.portApp = portApp;
+        this.portService = portService;
+        this.dockerInstance = dockerInstance;
+    }
+
+    private int setPortService() throws IOException {
+        while (minPortService < 65536) {
             try {
                 minPortService++;
                 var s = new ServerSocket(minPortService);
                 s.close();
                 break;
-            }catch (IOException e){
+            } catch (IOException e){
                 continue;
             }
         }
-        if(minPortService>65535){
+        if (minPortService > 65535) {
             throw new IOException("no free private port found");
         }
         return minPortService;
