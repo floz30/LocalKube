@@ -1,21 +1,18 @@
 package fr.umlv.localkube.repository;
 
 import fr.umlv.localkube.model.Application;
-import fr.umlv.localkube.model.ApplicationDataRecord;
-import fr.umlv.localkube.model.ApplicationRecord;
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 public class ApplicationRepository implements ApplicationService {
     private final Map<Integer, Application> apps = new HashMap<>();
 
     @Override
-    public List<ApplicationRecord> getAll() {
-        return apps.values().stream().map(Application::toApplicationRecord).collect(Collectors.toList());
+    public List<Application> getAll() {
+        return new ArrayList<>(apps.values());
     }
 
     @Override
@@ -34,19 +31,15 @@ public class ApplicationRepository implements ApplicationService {
     }
 
     @Override
-    public ApplicationDataRecord save(Application app) {
+    public Application save(Application app) {
         Objects.requireNonNull(app);
         apps.put(app.getId(), app);
-        return app.toApplicationStartRecord();
-    }
-
-    @Override
-    public List<Application> applicationList(){
-        return apps.values().stream().collect(Collectors.toList());
+        return app;
     }
 
     @Override
     public void remove(Application app) {
+        Objects.requireNonNull(app);
         apps.remove(app.getId());
     }
 
@@ -57,5 +50,9 @@ public class ApplicationRepository implements ApplicationService {
     @Override
     public String toString() {
         return apps.toString();
+    }
+
+    public int getMaxId() {
+        return apps.keySet().stream().mapToInt(x -> x).max().orElse(0) + 1;
     }
 }

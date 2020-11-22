@@ -1,22 +1,26 @@
 package fr.umlv.localkube.services;
 
 import fr.umlv.localkube.model.Application;
-import fr.umlv.localkube.model.ApplicationDataRecord;
-import fr.umlv.localkube.model.ApplicationRecord;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ApplicationService {
-    List<ApplicationRecord> getAll();
+    /**
+     * Return a list of all applications launched.
+     * @return a list of Application
+     */
+    List<Application> getAll();
 
     Optional<Application> findById(int id);
 
     int findAppIdByPortService(int portService);
 
-    List<Application> applicationList();
+    Application save(Application app);
 
-    ApplicationDataRecord save(Application app);
-
+    /**
+     * Delete application if exists.
+     * @param app application to delete
+     */
     void remove(Application app);
 }
