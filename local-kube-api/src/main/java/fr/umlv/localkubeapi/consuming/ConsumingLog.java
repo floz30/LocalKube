@@ -5,13 +5,16 @@ import org.springframework.web.client.RestTemplate;
 public class ConsumingLog implements LocalKubeConsuming {
 
     private final RestTemplate restTemplate;
+    private final int servicePort;
 
-    public ConsumingLog() {
+    public ConsumingLog(int servicePort) {
         this.restTemplate = new RestTemplate();
+        this.servicePort = servicePort;
     }
 
+    @Override
     public void insertLog(String message) {
-        // numéro de port à revoir
-        restTemplate.postForEntity("http://localhost:8080/log", message, String.class);
+        restTemplate.postForEntity("http://172.17.0.1:"+servicePort+"/log", message, String.class);
     }
+
 }

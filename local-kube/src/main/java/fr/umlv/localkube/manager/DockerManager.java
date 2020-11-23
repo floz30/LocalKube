@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 public class DockerManager {
     private static final String jarDirectoryName = "apps";
     private static final String dockerImagesDirectoryName = "docker-images";
+    private static final String libraryDirectoryName = "lib";
     private final OperatingSystem os;
 
 
@@ -48,7 +49,7 @@ public class DockerManager {
      */
     public void createImage(Application application) throws IOException, InvalidImageReferenceException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
         Jib.from("openjdk:15")
-                .addLayer(Arrays.asList(getPathToJarFile(application.getJarName())), AbsoluteUnixPath.get("/"))
+                .addLayer(Arrays.asList(getPathToJarFile(application.getJarName()),getPathToLibrary()), AbsoluteUnixPath.get("/"))
                 .containerize(Containerizer.to(TarImage.at(getPathToDockerImage(application.getName())).named(application.getName())));
     }
 
@@ -98,7 +99,7 @@ public class DockerManager {
         System.out.println(application.getDockerInstance());
         runCommand.command( os.getCMD(),
                             os.getOption(),
-                            "docker run --entrypoint java -d -p " + application.getPortApp() + ":8080 --name "  + application.getDockerInstance() + " " + application.getName() + " --enable-preview -jar demo.jar");
+                            "docker run --entrypoint java -d -p " + application.getPortApp() + ":8080 --name "  + application.getDockerInstance() + " " + application.getName() + " -Dloader.path=. --enable-preview -jar "+application.getName()+".jar --service.port="+application.getPortService());
         // permet de rediriger input/ouput/error dans celui du programme local-kube
         // avec l'option -d on affiche le container ID à stocker dans l'objet application
         // à voir si on peut pas le récupérer autrement que de l'afficher dans la sortie standard
@@ -133,6 +134,10 @@ public class DockerManager {
      */
     private Path getPathToJarFile(String jarFilename) {
         return Path.of(String.join(os.getSeparator(), os.getParent(), jarDirectoryName, jarFilename));
+    }
+
+    private Path getPathToLibrary(){
+        return Paths.get(String.join(os.getSeparator(), os.getParent(),libraryDirectoryName, "local-kube-api.jar"));
     }
 
     /**

@@ -18,7 +18,7 @@ public record DataBaseProperties(String username, String password, String path) 
             properties.load(file);
             return new DataBaseProperties(properties.getProperty("database.username"),
                     properties.getProperty("database.password"),
-                    Path.of("logs", File.separator, "logs.db").toAbsolutePath().toString());
+                    Path.of(properties.getProperty("database.path")).toAbsolutePath().toString());
         }
     }
 }

@@ -1,7 +1,6 @@
 package fr.umlv.localkube.repository;
 
 import fr.umlv.localkube.model.Application;
-import fr.umlv.localkube.model.ApplicationRecord;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationRepositoryTest {
-
+    /**
     private ApplicationRepository fillRepository(int n) {
         var repository = new ApplicationRepository();
         for (var i = 1; i <= n; i++) {
@@ -97,4 +96,5 @@ public class ApplicationRepositoryTest {
 
         Assertions.assertIterableEquals(expected, result);
     }
+    **/
 }
