@@ -14,8 +14,7 @@ public class ConsumingLog implements LocalKubeConsuming {
 
     @Override
     public void insertLog(String message) {
-        var ip = "host.docker.internal";
-        restTemplate.postForEntity("http://" + ip + ":" + servicePort + "/log", message, String.class);
+        restTemplate.postForEntity("http://host.docker.internal:" + servicePort + "/log", message, String.class);
     }
 
 }

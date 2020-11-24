@@ -99,7 +99,7 @@ public class DockerManager {
         System.out.println(application.getDockerInstance());
         runCommand.command( os.getCMD(),
                             os.getOption(),
-                            "docker run --add-host host.docker.internal:$(ip addr show docker0 | grep -Po 'inet \\K[\\d.]+') --entrypoint java -d -p " + application.getPortApp() + ":8080 --name "  + application.getDockerInstance() + " " + application.getName() + " -Dloader.path=. --enable-preview -jar "+application.getName()+".jar --service.port="+application.getPortService());
+                            "docker run "+os.getHostOption()+" --entrypoint java -d -p " + application.getPortApp() + ":8080 --name "  + application.getDockerInstance() + " " + application.getName() + " -Dloader.path=. --enable-preview -jar "+application.getName()+".jar --service.port="+application.getPortService());
         // permet de rediriger input/ouput/error dans celui du programme local-kube
         // avec l'option -d on affiche le container ID à stocker dans l'objet application
         // à voir si on peut pas le récupérer autrement que de l'afficher dans la sortie standard

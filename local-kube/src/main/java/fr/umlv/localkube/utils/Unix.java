@@ -21,4 +21,9 @@ public class Unix implements OperatingSystem {
     public String getOption() {
         return "-c";
     }
+
+    @Override
+    public String getHostOption() {
+        return "--add-host host.docker.internal:$(ip addr show docker0 | grep -Po 'inet \\K[\\d.]+')";
+    }
 }

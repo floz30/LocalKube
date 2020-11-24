@@ -28,6 +28,8 @@ public interface OperatingSystem {
      */
     String getOption();
 
+    String getHostOption();
+
     /**
      * Checks on which OS this program is running.
      * @return a new object which represents the OS (ex: Windows, Unix)

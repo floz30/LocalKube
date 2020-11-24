@@ -21,4 +21,9 @@ public class Windows implements OperatingSystem {
     public String getOption() {
         return "/c";
     }
+
+    @Override
+    public String getHostOption() {
+        return "";
+    }
 }
