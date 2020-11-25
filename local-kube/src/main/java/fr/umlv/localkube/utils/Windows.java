@@ -13,11 +13,6 @@ public class Windows implements OperatingSystem {
     }
 
     @Override
-    public String getParent() {
-        return ".";
-    }
-
-    @Override
     public String getOption() {
         return "/c";
     }

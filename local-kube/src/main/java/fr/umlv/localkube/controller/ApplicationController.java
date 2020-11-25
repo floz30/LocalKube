@@ -45,7 +45,7 @@ public class ApplicationController  {
 
     @PostMapping(path = "/app/start")
     public ResponseEntity start(@RequestBody StartApplicationData data) throws IOException {
-        int id = repository.getMaxId();
+        int id = repository.getNextId();
         var application = Application.initializeApp(data.app(), id);
 
         try {

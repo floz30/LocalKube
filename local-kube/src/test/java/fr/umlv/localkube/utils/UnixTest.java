@@ -26,4 +26,10 @@ public class UnixTest {
         assertEquals("-c", os.getOption());
     }
 
+    @Test
+    void getHostOption_Success() {
+        assertEquals("--add-host host.docker.internal:$(ip addr show docker0 | grep -Po 'inet \\K[\\d.]+')",
+                os.getHostOption());
+    }
+
 }

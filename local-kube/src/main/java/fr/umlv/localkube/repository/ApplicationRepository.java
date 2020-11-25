@@ -52,7 +52,7 @@ public class ApplicationRepository implements ApplicationService {
         return apps.toString();
     }
 
-    public int getMaxId() {
+    public int getNextId() {
         return apps.keySet().stream().mapToInt(x -> x).max().orElse(0) + 1;
     }
 }

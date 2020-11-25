@@ -9,12 +9,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LogTest {
 
     @Test
-    void log_TimestampNull() {
+    void shouldThrowNullPointerExceptionWhenTimestampIsNull() {
         assertThrows(NullPointerException.class, () -> new Log(0, "", null));
     }
 
     @Test
-    void log_MessageNull() {
+    void shouldThrowNullPointerExceptionWhenMessageIsNull() {
         assertThrows(NullPointerException.class, () -> new Log(0, null, new Timestamp(1)));
     }
 

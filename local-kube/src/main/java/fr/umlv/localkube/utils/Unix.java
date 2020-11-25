@@ -13,11 +13,6 @@ public class Unix implements OperatingSystem {
     }
 
     @Override
-    public String getParent() {
-        return "..";
-    }
-
-    @Override
     public String getOption() {
         return "-c";
     }

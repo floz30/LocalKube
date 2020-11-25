@@ -58,7 +58,7 @@ public class DockerManager {
      * @param application Initialized application
      * @return true if image exists otherwise false
      */
-    public boolean checksIfDockerImageExists(Application application) {
+    private boolean checksIfDockerImageExists(Application application) {
         return Files.exists(getPathToDockerImage(application.getName()));
     }
 
@@ -67,7 +67,7 @@ public class DockerManager {
      * @param application Initialized application
      * @return true if file exists otherwise false
      */
-    public boolean checksIfJarFileExists(Application application) {
+    private boolean checksIfJarFileExists(Application application) {
         return Files.exists(getPathToJarFile(application.getJarName()));
     }
 
