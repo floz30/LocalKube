@@ -20,13 +20,21 @@ public interface OperatingSystem {
      * Return a string containing parent path according to the OS.
      * @return the resulting string
      */
-    String getParent();
+    default String getParent() {
+        return "..";
+    }
 
     /**
      * Return a string containing an option for command according to the OS.
      * @return the resulting string
      */
     String getOption();
+
+    /**
+     * Return a string containing an option for docker run command according to the OS.
+     * @return the resulting string
+     */
+    String getHostOption();
 
     /**
      * Checks on which OS this program is running.

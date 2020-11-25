@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class LocalKubeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(LocalKubeApplication.class, args);
+        SpringApplication.run(LocalKubeApplication.class,args);
     }
 
 }

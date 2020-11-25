@@ -1,34 +1,85 @@
 package fr.umlv.localkube.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Calendar;
 import java.util.Objects;
 
 public class Application {
-    private static int COUNTER = 0;
+    private static final int minPortService = 49152;
     private final long startTime = System.currentTimeMillis();
+    /**
+     * Application ID
+     */
+    @JsonProperty("id")
     private final int id;
-    private final String app; // nom de l'application
-    private final int portApp; // port de l'application
-    private final int portService; // port de discussion avec LocalKube
-    private final String dockerInstance; // nom de l'instance du conteneur docker
+    /**
+     * Application name
+     */
+    @JsonProperty("app")
+    private final String app;
+    /**
+     * Application public port
+     */
+    @JsonProperty("port")
+    private final int portApp;
+    /**
+     * Application service/private port
+     */
+    @JsonProperty("service-port")
+    private final int portService;
+    /**
+     * Docker instance name
+     */
+    @JsonProperty("docker-instance")
+    private final String dockerInstance;
+    /**
+     * Elapsed time since application launch
+     */
+    @JsonProperty("elapsed-time")
+    private String elapsedTime;
 
-    public Application(ApplicationDataRecord applicationDataRecord) {
-        Objects.requireNonNull(applicationDataRecord.app());
-        this.app = applicationDataRecord.app();
-        this.id = ++COUNTER;
-        this.portApp = getPortFromName();
-        this.portService = 0;
-        this.dockerInstance = getName() + "_" + portApp;
+    public static Application initializeApp(String app, int id) throws IOException {
+        if (id <= 0) {
+            throw new IllegalArgumentException("id can't be negative");
+        }
+        Objects.requireNonNull(app);
+        var portApp = getPortFromName(app);
+        var portService = checkAndGetPortService();
+        var dockerInstance = app.split(":")[0] + "_" + portApp;
+        return new Application(id, app, portApp, portService, dockerInstance);
     }
 
-    public ApplicationRecord toApplicationRecord() {
-        return new ApplicationRecord(id, app, portApp, portService, dockerInstance, getElapsedTime());
+    private Application(int id, String app, int portApp, int portService, String dockerInstance) {
+        this.id = id;
+        this.app = app;
+        this.portApp = portApp;
+        this.portService = portService;
+        this.dockerInstance = dockerInstance;
     }
 
-    public ApplicationDataRecord toApplicationStartRecord() {
-        return new ApplicationDataRecord(id, app, portApp, portService, dockerInstance);
+    private static int checkAndGetPortService() throws IOException {
+        var port = minPortService;
+        while (port < 65536) {
+            try {
+                port++;
+                var s = new ServerSocket(port);
+                s.close();
+                break;
+            } catch (IOException ignored){
+
+            }
+        }
+        if (port > 65535) {
+            throw new IOException("no free private port found");
+        }
+        return port;
     }
 
+    @JsonIgnore
     public String getJarName() {
         return getName() + ".jar";
     }
@@ -37,25 +88,34 @@ public class Application {
         return id;
     }
 
+    @JsonIgnore
     public String getName() {
         return app.split(":")[0];
     }
 
-    public int getPort() {
-        return portApp;
+    public String getApp() {
+        return app;
     }
 
-    private int getPortFromName() {
-        var strPort = app.split(":")[1];
-        return Integer.parseInt(strPort);
+    public int getPortService() {
+        return portService;
+    }
+
+    public int getPortApp() {
+        return portApp;
     }
 
     public String getDockerInstance() {
         return dockerInstance;
     }
 
-    private String getElapsedTime() {
+    public String getElapsedTime() {
         return formatElapsedTime(System.currentTimeMillis());
+    }
+
+    private static int getPortFromName(String app) {
+        var strPort = app.split(":")[1];
+        return Integer.parseInt(strPort);
     }
 
     private String formatElapsedTime(long endTime) {
