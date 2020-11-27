@@ -1,23 +1,20 @@
 package fr.umlv.localkube;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import fr.umlv.localkube.controller.ApplicationController;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 
-@Disabled
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 public class LocalKubeApplicationTest {
 
     @Autowired
-    private ApplicationController controller;
+    private MockMvc mockMvc;
 
     @Test
     void contextLoads() throws Exception {
-        assertThat(controller).isNotNull();
     }
 
 }
