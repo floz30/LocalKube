@@ -1,8 +1,12 @@
 package fr.umlv.localkube.repository;
 
+import fr.umlv.localkube.model.Application;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,6 +41,21 @@ public class ApplicationRepositoryTest {
         var result = repository.findById(-1);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test @Tag("getNextId")
+    void getNextIdShouldReturnOne() {
+        var result = repository.getNextId();
+
+        assertEquals(1, result);
+    }
+
+    @Test @Tag("getNextId")
+    void getNextIdShouldReturnSix() {
+        repository.save(new Application.ApplicationBuilder().setId(5).build());
+        var result = repository.getNextId();
+
+        assertEquals(6, result);
     }
 
 

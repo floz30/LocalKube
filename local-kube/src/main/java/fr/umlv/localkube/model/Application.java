@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.Random;
 
 public class Application {
     private static final int minPortService = 49152;
@@ -41,6 +42,52 @@ public class Application {
      */
     @JsonProperty("elapsed-time")
     private String elapsedTime;
+
+    public static class ApplicationBuilder {
+        private int id;
+        private String app;
+        private int portApp;
+        private int portService;
+        private String dockerInstance;
+
+        public Application build() {
+            if (id <= 0) {
+                throw new IllegalStateException("id can't be negative or equal to 0");
+            }
+            return new Application(id, app, portApp, portService, dockerInstance);
+        }
+
+        public Application buildRandom() {
+            var id = new Random().nextInt(100_000) + 1; // pour éviter 0
+            var portApp = new Random().nextInt(65536);
+            var portService = new Random().nextInt(65536);
+            var app = "hello:" + portApp;
+            var dockerInstance = "hello_" + portApp;
+            return new Application(id, app, portApp, portService, dockerInstance);
+        }
+
+        public ApplicationBuilder setId(int id) {
+            this.id = id;
+            return this;
+        }
+        public ApplicationBuilder setApp(String app) {
+            this.app = app;
+            return this;
+        }
+        public ApplicationBuilder setportApp(int portApp) {
+            this.portApp = portApp;
+            return this;
+        }
+        public ApplicationBuilder setportService(int portService) {
+            this.portService = portService;
+            return this;
+        }
+        public ApplicationBuilder setDockerInstance(String dockerInstance) {
+            this.dockerInstance = dockerInstance;
+            return this;
+        }
+
+    }
 
     public static Application initializeApp(String app, int id) throws IOException {
         if (id <= 0) {
