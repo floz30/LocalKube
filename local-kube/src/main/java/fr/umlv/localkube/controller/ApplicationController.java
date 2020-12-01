@@ -1,6 +1,7 @@
 package fr.umlv.localkube.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.*;
@@ -39,9 +40,9 @@ public class ApplicationController  {
     private record StopApplicationData(@JsonProperty("id") int id) { }
 
     @Autowired
-    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration) {
+    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration, DockerProperties properties) {
         this.repository = repository;
-        this.dockerManager = new DockerManager(OperatingSystem.checkOS());
+        this.dockerManager = new DockerManager(OperatingSystem.checkOS(),properties);
         this.configuration = configuration;
     }
 

@@ -2,6 +2,7 @@ package fr.umlv.localkube.manager;
 
 import com.google.cloud.tools.jib.api.*;
 import com.google.cloud.tools.jib.api.buildplan.AbsoluteUnixPath;
+import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.utils.OperatingSystem;
 
@@ -15,14 +16,13 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 public class DockerManager {
-    private static final String jarDirectoryName = "apps";
-    private static final String dockerImagesDirectoryName = "docker-images";
-    private static final String libraryDirectoryName = "lib";
     private final OperatingSystem os;
+    private final DockerProperties properties;
 
 
-    public DockerManager(OperatingSystem os) {
+    public DockerManager(OperatingSystem os, DockerProperties properties) {
         this.os = os;
+        this.properties= properties;
     }
 
     public void start(Application application) throws IOException, RegistryException, InterruptedException, ExecutionException, CacheDirectoryCreationException, InvalidImageReferenceException {
@@ -80,7 +80,7 @@ public class DockerManager {
     public void loadImage(Application application) throws IOException, InterruptedException {
         var loadCommand = new ProcessBuilder();
         loadCommand.command(os.getCMD(), os.getOption(), "docker load < " + application.getName());
-        loadCommand.directory(new File(os.getParent() + os.getSeparator() + dockerImagesDirectoryName)); // on se place dans le répertoire des images
+        loadCommand.directory(new File(getPathToDockerImage("").toString())); // on se place dans le répertoire des images
         loadCommand.inheritIO();
         if (loadCommand.start().waitFor()!=0){ //réussir à rediriger l'erreur sous forme d'exception
             throw new IOException("load command failed");
@@ -133,11 +133,11 @@ public class DockerManager {
      * @return the resulting path
      */
     private Path getPathToJarFile(String jarFilename) {
-        return Path.of(String.join(os.getSeparator(), os.getParent(), jarDirectoryName, jarFilename));
+        return Paths.get(properties.getApps(),jarFilename);
     }
 
     private Path getPathToLibrary(){
-        return Paths.get(String.join(os.getSeparator(), os.getParent(),libraryDirectoryName, "local-kube-api.jar"));
+        return Paths.get(properties.getLib());
     }
 
     /**
@@ -146,6 +146,6 @@ public class DockerManager {
      * @return the resulting path
      */
     private Path getPathToDockerImage(String imageName) {
-        return Path.of(String.join(os.getSeparator(), os.getParent(), dockerImagesDirectoryName, imageName));
+        return Paths.get(properties.getImages(),imageName);
     }
 }

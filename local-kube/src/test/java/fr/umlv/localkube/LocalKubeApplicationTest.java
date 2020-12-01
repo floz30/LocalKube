@@ -14,7 +14,7 @@ public class LocalKubeApplicationTest {
     private MockMvc mockMvc;
 
     @Test
-    void contextLoads() throws Exception {
+    void contextLoads(){
     }
 
 }

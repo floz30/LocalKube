@@ -1,21 +1,19 @@
 package fr.umlv.localkube.repository;
 
+import fr.umlv.localkube.configuration.DataBaseProperties;
 import fr.umlv.localkube.manager.LogDataBaseManager;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.services.LogService;
 import org.springframework.stereotype.Repository;
 
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.time.Duration;
 import java.util.List;
 
 @Repository
 public class LogRepository implements LogService {
     private final LogDataBaseManager logManager;
 
-    public LogRepository() throws IOException {
-        this.logManager = LogDataBaseManager.initialize();;
+    public LogRepository(DataBaseProperties properties){
+        this.logManager = LogDataBaseManager.initialize(properties);
     }
 
     @Override

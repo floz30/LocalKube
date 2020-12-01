@@ -1,12 +1,6 @@
 package fr.umlv.localkube.manager;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+/**
 public class LogDataBaseManagerTest {
 
     @Test
@@ -36,3 +30,4 @@ public class LogDataBaseManagerTest {
 
 
 }
+**/

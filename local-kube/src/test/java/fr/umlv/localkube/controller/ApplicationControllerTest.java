@@ -1,30 +1,22 @@
 package fr.umlv.localkube.controller;
 
-import com.google.cloud.tools.jib.api.CacheDirectoryCreationException;
-import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
-import com.google.cloud.tools.jib.api.RegistryException;
+import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.repository.ApplicationRepository;
 import fr.umlv.localkube.utils.OperatingSystem;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito.*;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -71,7 +63,7 @@ public class ApplicationControllerTest {
         // Arrange
         var app = new Application.ApplicationBuilder().setId(2).setApp("toto:8081").build();
         var repository = spy(new ApplicationRepository());
-        var manager = spy(new DockerManager(mock(OperatingSystem.class)));
+        var manager = spy(new DockerManager(mock(OperatingSystem.class),new DockerProperties()));
         var configuration = spy(new LocalKubeConfiguration(mock(ServletWebServerApplicationContext.class)));
 
         doReturn(1).when(repository).getNextId();
