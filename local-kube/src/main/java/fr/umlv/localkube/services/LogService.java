@@ -1,43 +1,52 @@
 package fr.umlv.localkube.services;
 
-import fr.umlv.localkube.configuration.DataBaseProperties;
-import fr.umlv.localkube.manager.LogDataBaseManager;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.LogRepository;
-import org.springframework.stereotype.Repository;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.List;
 
-@Repository
-public class LogService implements LogRepository {
-    private final LogDataBaseManager logManager;
+@Service
+public class LogService {
+    private final Jdbi db;
+    private final LogRepository repository;
 
-    public LogService(DataBaseProperties properties){
-        this.logManager = LogDataBaseManager.initialize(properties);
+    private LogService(Jdbi db, LogRepository repository){
+        this.db = db;
+        this.repository = repository;
+        repository.init();
     }
 
-    @Override
-    public void save(Log log) {
-        logManager.insertLog(log.appId(), log.message(), log.timestamp());
+    /**
+     * Saves a given log.
+     */
+    public void save(int appId, String message, Timestamp timestamp) {
+        repository.save(appId, message, timestamp);
     }
 
-    @Override
+    /**
+     * Returns all instances of log.
+     * @return all logs
+     */
     public List<Log> findAll() {
-        return logManager.selectAll();
+        return repository.findAll();
     }
 
-//    @Override
-//    public List<Log> selectAllFromDuration(Duration minutes) {
-//        return logManager.selectAllFromDuration(minutes);
-//    }
-//
-//    @Override
-//    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
-//        return logManager.selectAllFromDurationById(minutes, id);
-//    }
-//
-//    @Override
-//    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
-//        return logManager.selectAllFromDurationByApp(minutes, app);
-//    }
+    //    public List<Log> selectAllFromDuration(Duration minutes) {
+    //        Objects.requireNonNull(minutes);
+    //        return jdbi.withHandle(handle -> handle.createQuery("SELECT * FROM log WHERE timestamp > DATETIME('now', '-" + minutes.toMinutes() + " minutes')").map(this::mapToLog).list());
+    //    }
+    //
+    //    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
+    //        Objects.requireNonNull(minutes);
+    //        return jdbi.withHandle(handle -> handle.createQuery("SELECT * FROM log WHERE timestamp > DATETIME('now', '-" + minutes.toMinutes() + " minutes') AND id = " + id).map(this::mapToLog).list());
+    //    }
+    //
+    //    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
+    //        Objects.requireNonNull(minutes);
+    //        Objects.requireNonNull(app);
+    //        return jdbi.withHandle(handle -> handle.createQuery("SELECT * FROM log WHERE timestamp > DATETIME('now', '-" + minutes.toMinutes() + " minutes') AND app = '" + app + "'").map(this::mapToLog).list());
+    //    }
 }

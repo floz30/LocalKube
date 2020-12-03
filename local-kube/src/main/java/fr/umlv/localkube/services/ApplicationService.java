@@ -2,11 +2,11 @@ package fr.umlv.localkube.services;
 
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.repository.ApplicationRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Repository
+@Service
 public class ApplicationService implements ApplicationRepository {
     private final Map<Integer, Application> apps = new HashMap<>();
 

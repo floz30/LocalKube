@@ -1,10 +1,12 @@
 package fr.umlv.localkube.repository;
 
 import fr.umlv.localkube.model.Application;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface ApplicationRepository {
     /**
      * Return a list of all applications launched.

@@ -1,9 +1,14 @@
 package fr.umlv.localkube.configuration;
 
+import fr.umlv.localkube.repository.LogRepository;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Connector;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.sqlite3.SQLitePlugin;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.springframework.boot.web.embedded.tomcat.TomcatWebServer;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
@@ -45,5 +50,18 @@ public class LocalKubeConfiguration {
         connector.setSecure(true);
         connector.setDomain("localhost");
         return connector;
+    }
+
+    @Bean
+    public Jdbi createJdbi(DataBaseProperties properties) {
+        var db =  Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword());
+        db.installPlugin(new SQLitePlugin());
+        db.installPlugin(new SqlObjectPlugin());
+        return db;
+    }
+
+    @Bean
+    public LogRepository logRepository(Jdbi jdbi) {
+        return jdbi.onDemand(LogRepository.class);
     }
 }

@@ -10,12 +10,12 @@ public class LogTest {
 
     @Test
     void shouldThrowNullPointerExceptionWhenTimestampIsNull() {
-        assertThrows(NullPointerException.class, () -> new Log(0, "", null));
+        assertThrows(NullPointerException.class, () -> new Log(0, 0, "", null));
     }
 
     @Test
     void shouldThrowNullPointerExceptionWhenMessageIsNull() {
-        assertThrows(NullPointerException.class, () -> new Log(0, null, new Timestamp(1)));
+        assertThrows(NullPointerException.class, () -> new Log(0, 0, null, new Timestamp(1)));
     }
 
 }
