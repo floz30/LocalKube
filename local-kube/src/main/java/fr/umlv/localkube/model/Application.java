@@ -2,6 +2,7 @@ package fr.umlv.localkube.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -10,37 +11,51 @@ import java.util.Objects;
 import java.util.Random;
 
 public class Application {
-    private static final int minPortService = 49152;
+
+    public interface View {
+         interface OnStart {}
+         interface OnListAndStop extends OnStart {}
+    }
+
+    private static final int MIN_PORT_SERVICE = 49152;
+    private static final int MAX_PORT_SERVICE = 65535;
     private final long startTime = System.currentTimeMillis();
+
     /**
      * Application ID
      */
     @JsonProperty("id")
+    @JsonView(View.OnStart.class)
     private final int id;
     /**
      * Application name
      */
     @JsonProperty("app")
+    @JsonView(View.OnStart.class)
     private final String app;
     /**
      * Application public port
      */
     @JsonProperty("port")
+    @JsonView(View.OnStart.class)
     private final int portApp;
     /**
      * Application service/private port
      */
     @JsonProperty("service-port")
+    @JsonView(View.OnStart.class)
     private final int portService;
     /**
      * Docker instance name
      */
     @JsonProperty("docker-instance")
+    @JsonView(View.OnStart.class)
     private final String dockerInstance;
     /**
      * Elapsed time since application launch
      */
     @JsonProperty("elapsed-time")
+    @JsonView(View.OnListAndStop.class)
     private String elapsedTime;
 
     public static class ApplicationBuilder {
@@ -95,7 +110,7 @@ public class Application {
         }
         Objects.requireNonNull(app);
         var portApp = getPortFromName(app);
-        var portService = checkAndGetPortService();
+        var portService = getAvailablePortService();
         var dockerInstance = app.split(":")[0] + "_" + portApp;
         return new Application(id, app, portApp, portService, dockerInstance);
     }
@@ -108,20 +123,19 @@ public class Application {
         this.dockerInstance = dockerInstance;
     }
 
-    private static int checkAndGetPortService() throws IOException {
-        var port = minPortService;
-        while (port < 65536) {
+    private static int getAvailablePortService() throws IOException {
+        var port = MIN_PORT_SERVICE-1;
+        while (port < MAX_PORT_SERVICE+1) {
             try {
                 port++;
                 var s = new ServerSocket(port);
                 s.close();
                 break;
             } catch (IOException ignored){
-
             }
         }
-        if (port > 65535) {
-            throw new IOException("no free private port found");
+        if (port > MAX_PORT_SERVICE) {
+            throw new IOException("no available private port found");
         }
         return port;
     }
@@ -140,10 +154,6 @@ public class Application {
         return app.split(":")[0];
     }
 
-    public String getApp() {
-        return app;
-    }
-
     public int getPortService() {
         return portService;
     }
@@ -157,7 +167,8 @@ public class Application {
     }
 
     public String getElapsedTime() {
-        return formatElapsedTime(System.currentTimeMillis());
+        elapsedTime = formatElapsedTime(System.currentTimeMillis());
+        return elapsedTime;
     }
 
     private static int getPortFromName(String app) {

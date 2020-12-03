@@ -18,15 +18,14 @@ public class LocalKubeConfiguration {
     }
 
     public void addServicePort(int servicePort){
-        var tomcatWebServer = (TomcatWebServer) server.getWebServer();
+        var tomcatWebServer = TomcatWebServer.class.cast(server.getWebServer());
         tomcatWebServer.getTomcat().setConnector(connectorFromPort(servicePort));
     }
 
     public void removeServicePort(int servicePort) throws IOException, LifecycleException {
-        var tomcatWebServer = (TomcatWebServer) server.getWebServer();
+        var tomcatWebServer = TomcatWebServer.class.cast(server.getWebServer());
         var service = tomcatWebServer.getTomcat().getService();
         var connectors = service.findConnectors();
-
         for(var connector : connectors ){
             if(connector.getPort() == servicePort){
                 connector.stop();
