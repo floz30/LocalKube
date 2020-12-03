@@ -1,9 +1,9 @@
 package fr.umlv.localkube.controller;
 
 import fr.umlv.localkube.model.Log;
-import fr.umlv.localkube.repository.ApplicationRepository;
-import fr.umlv.localkube.repository.LogRepository;
 import fr.umlv.localkube.services.ApplicationService;
+import fr.umlv.localkube.services.LogService;
+import fr.umlv.localkube.repository.ApplicationRepository;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,11 +13,11 @@ import java.util.List;
 
 @RestController
 public class LogController {
-    private final LogRepository service;
-    private final ApplicationService applicationService;
+    private final LogService service;
+    private final ApplicationRepository applicationService;
 
 
-    public LogController(LogRepository service, ApplicationRepository applicationRepository) {
+    public LogController(LogService service, ApplicationService applicationRepository) {
         this.service = service;
         this.applicationService = applicationRepository;
     }
@@ -28,13 +28,13 @@ public class LogController {
             throw new IOException("Tried to add log on public port 8080");
         }
         var id = applicationService.findAppIdByPortService(request.getLocalPort());
-        service.insertLog(new Log(id,message,new Timestamp(System.currentTimeMillis())));
+        service.save(new Log(id,message,new Timestamp(System.currentTimeMillis())));
         return "New log add successfully for application : " + id;
     }
 
     @GetMapping("/logs")
     public List<Log> list() {
-        return service.selectAll();
+        return service.findAll();
     }
 
 }

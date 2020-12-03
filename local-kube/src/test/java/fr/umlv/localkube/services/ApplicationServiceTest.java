@@ -1,19 +1,20 @@
-package fr.umlv.localkube.repository;
+package fr.umlv.localkube.services;
 
 import fr.umlv.localkube.model.Application;
+import fr.umlv.localkube.services.ApplicationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ApplicationRepositoryTest {
+public class ApplicationServiceTest {
 
-    private ApplicationRepository repository;
+    private ApplicationService repository;
 
     @BeforeEach
     void setUp() {
-        repository = new ApplicationRepository();
+        repository = new ApplicationService();
     }
 
     @Test @Tag("save")
@@ -24,7 +25,7 @@ public class ApplicationRepositoryTest {
 
     @Test @Tag("remove")
     void shouldThrowNullPointerExceptionWhenRemoveNull() {
-        assertThrows(NullPointerException.class, () -> repository.remove(null));
+        assertThrows(NullPointerException.class, () -> repository.delete(null));
     }
 
     @Test @Tag("getNextId")
