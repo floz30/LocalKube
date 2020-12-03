@@ -27,7 +27,7 @@ public class ApplicationService implements ApplicationRepository {
                 return app.getId();
             }
         }
-        throw new IllegalStateException("application map must contains this port : "+portService);
+        throw new IllegalStateException("Application map must contains this port : "+portService);
     }
 
     @Override
