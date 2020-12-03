@@ -1,17 +1,13 @@
 package fr.umlv.localkube.manager;
 
+import fr.umlv.localkube.configuration.DataBaseProperties;
 import fr.umlv.localkube.model.Log;
-import fr.umlv.localkube.utils.DataBaseProperties;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.StatementContext;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,9 +19,8 @@ public class LogDataBaseManager {
         this.jdbi = jdbi;
     }
 
-    public static LogDataBaseManager initialize() throws IOException {
-        var properties = DataBaseProperties.credentialsFromPropertiesFile();
-        var jdbi = Jdbi.create("jdbc:sqlite:" + properties.path(), properties.username(), properties.password());
+    public static LogDataBaseManager initialize(DataBaseProperties properties) {
+        var jdbi = Jdbi.create(properties.getUrl(),properties.getUsername(),properties.getPassword());
         //.installPlugin(new SQLitePlugin());
         createTable(jdbi);
         cleanTable(jdbi);
@@ -37,7 +32,7 @@ public class LogDataBaseManager {
      * @param jdbi
      */
     private static void createTable(Jdbi jdbi) {
-        jdbi.withHandle(handle ->
+        jdbi.useHandle(handle ->
                 handle.execute("CREATE TABLE IF NOT EXISTS log (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "app_id INTEGER NOT NULL, " +
@@ -62,7 +57,7 @@ public class LogDataBaseManager {
      */
     public void insertLog(int app_id, String message, Timestamp timestamp) {
         Objects.requireNonNull(message);
-        jdbi.withHandle(handle ->
+        jdbi.useHandle(handle ->
                 handle.createUpdate("INSERT INTO log(app_id,message,timestamp) VALUES (:a,:m,:t)")
                         .bind("a", app_id)
                         .bind("m", message)

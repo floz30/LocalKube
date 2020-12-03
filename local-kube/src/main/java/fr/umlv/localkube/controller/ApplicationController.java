@@ -1,12 +1,14 @@
 package fr.umlv.localkube.controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.*;
 import fr.umlv.localkube.repository.ApplicationRepository;
 import fr.umlv.localkube.utils.OperatingSystem;
 import org.apache.catalina.LifecycleException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +28,7 @@ public class ApplicationController  {
     /**
      * Contains data from JSON when we want start a new application.
      */
-    private record StartApplicationData(@JsonProperty("app") String app) {
+    record StartApplicationData(@JsonProperty("app") String app) {
         StartApplicationData {
             Objects.requireNonNull(app);
         }
@@ -37,9 +39,16 @@ public class ApplicationController  {
      */
     private record StopApplicationData(@JsonProperty("id") int id) { }
 
-    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration) {
+    @Autowired
+    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration, DockerProperties properties) {
         this.repository = repository;
-        this.dockerManager = new DockerManager(OperatingSystem.checkOS());
+        this.dockerManager = new DockerManager(OperatingSystem.checkOS(),properties);
+        this.configuration = configuration;
+    }
+
+    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration, DockerManager dockerManager) {
+        this.repository = repository;
+        this.dockerManager = dockerManager;
         this.configuration = configuration;
     }
 

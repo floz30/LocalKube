@@ -2,8 +2,6 @@ package fr.umlv.localkube.services;
 
 import fr.umlv.localkube.model.Log;
 
-import java.sql.Timestamp;
-import java.time.Duration;
 import java.util.List;
 
 public interface LogService {
