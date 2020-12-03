@@ -1,43 +1,26 @@
 package fr.umlv.localkube.repository;
 
-import fr.umlv.localkube.configuration.DataBaseProperties;
-import fr.umlv.localkube.manager.LogDataBaseManager;
 import fr.umlv.localkube.model.Log;
-import fr.umlv.localkube.services.LogService;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
-@Repository
-public class LogRepository implements LogService {
-    private final LogDataBaseManager logManager;
+public interface LogRepository {
 
-    public LogRepository(DataBaseProperties properties){
-        this.logManager = LogDataBaseManager.initialize(properties);
-    }
+    /**
+     * Saves a given log.
+     * @param log log to save
+     */
+    void save(Log log);
 
-    @Override
-    public void insertLog(Log log) {
-        logManager.insertLog(log.appId(), log.message(), log.timestamp());
-    }
+    /**
+     * Returns all instances of log.
+     * @return all logs
+     */
+    Iterable<Log> findAll();
 
-    @Override
-    public List<Log> selectAll() {
-        return logManager.selectAll();
-    }
-
-//    @Override
-//    public List<Log> selectAllFromDuration(Duration minutes) {
-//        return logManager.selectAllFromDuration(minutes);
-//    }
+//    List<Log> selectAllFromDuration(Duration minutes);
 //
-//    @Override
-//    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
-//        return logManager.selectAllFromDurationById(minutes, id);
-//    }
+//    List<Log> selectAllFromDurationById(Duration minutes, int id);
 //
-//    @Override
-//    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
-//        return logManager.selectAllFromDurationByApp(minutes, app);
-//    }
+//    List<Log> selectAllFromDurationByApp(Duration minutes, String app);
+
 }

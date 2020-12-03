@@ -5,7 +5,7 @@ import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.*;
-import fr.umlv.localkube.repository.ApplicationRepository;
+import fr.umlv.localkube.services.ApplicationService;
 import fr.umlv.localkube.utils.OperatingSystem;
 import org.apache.catalina.LifecycleException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.Objects;
 @RestController
 public class ApplicationController  {
 
-    private final ApplicationRepository repository;
+    private final ApplicationService repository;
     private final DockerManager dockerManager;
     private final LocalKubeConfiguration configuration;
 
@@ -40,13 +40,13 @@ public class ApplicationController  {
     private record StopApplicationData(@JsonProperty("id") int id) { }
 
     @Autowired
-    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration, DockerProperties properties) {
+    public ApplicationController(ApplicationService repository, LocalKubeConfiguration configuration, DockerProperties properties) {
         this.repository = repository;
         this.dockerManager = new DockerManager(OperatingSystem.checkOS(),properties);
         this.configuration = configuration;
     }
 
-    public ApplicationController(ApplicationRepository repository, LocalKubeConfiguration configuration, DockerManager dockerManager) {
+    public ApplicationController(ApplicationService repository, LocalKubeConfiguration configuration, DockerManager dockerManager) {
         this.repository = repository;
         this.dockerManager = dockerManager;
         this.configuration = configuration;
@@ -68,7 +68,7 @@ public class ApplicationController  {
 
     @GetMapping("/app/list")
     public List<Application> list() {
-        return repository.getAll();
+        return repository.findAll();
     }
 
     @PostMapping(path = "/app/stop")
@@ -83,7 +83,7 @@ public class ApplicationController  {
             } catch (IOException | InterruptedException | LifecycleException ioe) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            repository.remove(appFound);
+            repository.delete(appFound);
             return new ResponseEntity<>(appFound, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -91,7 +91,7 @@ public class ApplicationController  {
 
     @PreDestroy
     public void onShutdown() throws IOException, InterruptedException {
-        for (var application : repository.getAll()){
+        for (var application : repository.findAll()){
             dockerManager.stopContainer(application);
         }
     }
