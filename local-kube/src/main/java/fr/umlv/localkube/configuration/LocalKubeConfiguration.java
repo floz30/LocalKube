@@ -1,20 +1,25 @@
 package fr.umlv.localkube.configuration;
 
+import fr.umlv.localkube.component.Interceptor;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Connector;
 import org.springframework.boot.web.embedded.tomcat.TomcatWebServer;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
 
 @Configuration
-public class LocalKubeConfiguration {
+public class LocalKubeConfiguration implements WebMvcConfigurer {
 
     private final ServletWebServerApplicationContext server;
+    private final Interceptor interceptor;
 
-    public LocalKubeConfiguration(ServletWebServerApplicationContext server){
+    public LocalKubeConfiguration(ServletWebServerApplicationContext server,Interceptor interceptor){
         this.server = server;
+        this.interceptor = interceptor;
     }
 
     public void addServicePort(int servicePort){
@@ -44,5 +49,10 @@ public class LocalKubeConfiguration {
         connector.setSecure(true);
         connector.setDomain("localhost");
         return connector;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(interceptor);
     }
 }

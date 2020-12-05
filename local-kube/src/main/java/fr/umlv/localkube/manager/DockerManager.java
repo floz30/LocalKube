@@ -110,25 +110,45 @@ public class DockerManager {
      * @throws IOException If an I/O error occurs
      */
     public void stopContainer(Application application) throws IOException, InterruptedException {
-        var stopCommand = new ProcessBuilder();
-        stopCommand.command(os.getCMD(), os.getOption(), " docker rm -f " + application.getDockerInstance());
-        testExitValue(stopCommand.start());
-
+        removeContainer(application.getDockerInstance());
     }
 
-    private void testExitValue(Process process) throws InterruptedException, IOException {
-        if (process.waitFor() != 0) {
-            throw new IOException(readErrorStream(process.getErrorStream()));
+    public void stopContainer(String name) throws IOException, InterruptedException {
+        removeContainer(name);
+    }
+
+    private void removeContainer(String name) throws IOException, InterruptedException {
+        var stopCommand = new ProcessBuilder();
+        stopCommand.command(os.getCMD(), os.getOption(), " docker rm -f " + name);
+        testExitValue(stopCommand.start());
+    }
+
+    public void removeAll(String[] names) throws IOException, InterruptedException {
+        for(String name : names){
+            removeContainer(name);
         }
     }
 
-    private String readErrorStream(InputStream inputStream) throws IOException {
-        var errorReader = new BufferedReader(new InputStreamReader(inputStream));
-        return errorReader.lines().collect(Collectors.joining());
+    public String[] listDeadContainers() throws IOException, InterruptedException {
+        var listCommand = new ProcessBuilder();
+        listCommand.command(os.getCMD(), os.getOption(), "docker ps -f 'status=exited' --format '{{.Names}}'");
+        var names = testExitValue(listCommand.start());
+        if(names.length()<1){
+            return new String[0];
+        }
+        return names.split("\n");
     }
 
-    public void listAllContainers() {
-        throw new UnsupportedOperationException("Not implemented yet");
+    private String testExitValue(Process process) throws InterruptedException, IOException {
+        if (process.waitFor() != 0) {
+            throw new IOException(readInputStream(process.getErrorStream()));
+        }
+        return readInputStream(process.getInputStream());
+    }
+
+    private String readInputStream(InputStream inputStream) throws IOException {
+        var errorReader = new BufferedReader(new InputStreamReader(inputStream));
+        return errorReader.lines().collect(Collectors.joining());
     }
 
     /**

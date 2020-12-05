@@ -5,6 +5,7 @@ import fr.umlv.localkube.repository.ApplicationRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class ApplicationService implements ApplicationRepository {
@@ -41,6 +42,13 @@ public class ApplicationService implements ApplicationRepository {
     public void delete(Application app) {
         Objects.requireNonNull(app);
         apps.remove(app.getId());
+    }
+
+    @Override
+    public void removeAllByDockerInstanceName(String[] names) {
+        for(String name : names){
+            apps.values().stream().filter(application -> application.getDockerInstance().equals(name)).findFirst().ifPresent(application -> apps.remove(application.getId()));
+        }
     }
 
     public int size() {
