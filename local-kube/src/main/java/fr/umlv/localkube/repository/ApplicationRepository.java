@@ -39,4 +39,6 @@ public interface ApplicationRepository {
      * @throws NullPointerException in case the given application is null
      */
     void delete(Application app);
+
+    void removeAllByDockerInstanceName(String[] names);
 }

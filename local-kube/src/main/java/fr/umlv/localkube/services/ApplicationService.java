@@ -5,6 +5,7 @@ import fr.umlv.localkube.repository.ApplicationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService implements ApplicationRepository {
@@ -27,7 +28,7 @@ public class ApplicationService implements ApplicationRepository {
                 return app.getId();
             }
         }
-        throw new IllegalStateException("application map must contains this port : "+portService);
+        throw new IllegalStateException("Application map must contains this port : "+portService);
     }
 
     public OptionalInt findIdByName(String name) {
@@ -49,6 +50,13 @@ public class ApplicationService implements ApplicationRepository {
     public void delete(Application app) {
         Objects.requireNonNull(app);
         apps.remove(app.getId());
+    }
+
+    @Override
+    public void removeAllByDockerInstanceName(String[] names) {
+        for(String name : names){
+            apps.values().stream().filter(application -> application.getDockerInstance().equals(name)).findFirst().ifPresent(application -> apps.remove(application.getId()));
+        }
     }
 
     public int size() {
