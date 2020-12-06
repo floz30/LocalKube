@@ -5,7 +5,9 @@ import fr.umlv.localkube.repository.LogRepository;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -16,6 +18,10 @@ public class LogService {
     private LogService(Jdbi db, LogRepository repository){
         this.db = db;
         this.repository = repository;
+    }
+
+    @PostConstruct
+    private void init() {
         repository.init();
     }
 
@@ -34,15 +40,17 @@ public class LogService {
         return repository.findAll();
     }
 
-    //    public List<Log> selectAllFromDuration(Duration minutes) {
-    //        Objects.requireNonNull(minutes);
-    //        return jdbi.withHandle(handle -> handle.createQuery("SELECT * FROM log WHERE timestamp > DATETIME('now', '-" + minutes.toMinutes() + " minutes')").map(this::mapToLog).list());
-    //    }
-    //
-    //    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
-    //        Objects.requireNonNull(minutes);
-    //        return jdbi.withHandle(handle -> handle.createQuery("SELECT * FROM log WHERE timestamp > DATETIME('now', '-" + minutes.toMinutes() + " minutes') AND id = " + id).map(this::mapToLog).list());
-    //    }
+    //TODO ajouter le filtrage des logs (GET /logs/:time), (GET /logs/:time/:filter) et (GET /logs/:time/:filter/:value)
+
+    public List<Log> selectAllFromDuration(int minutes) {
+        var timestamp = LocalDateTime.now().minusMinutes(minutes).toString();
+        return repository.findAll(timestamp);
+    }
+
+    public List<Log> selectAllFromDurationById(int minutes, int id) {
+        var timestamp = LocalDateTime.now().minusMinutes(minutes).toString();
+        return repository.findAllFilterById(timestamp, id);
+    }
     //
     //    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
     //        Objects.requireNonNull(minutes);

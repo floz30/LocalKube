@@ -30,6 +30,14 @@ public class ApplicationService implements ApplicationRepository {
         throw new IllegalStateException("application map must contains this port : "+portService);
     }
 
+    public OptionalInt findIdByName(String name) {
+        return apps.entrySet().stream().filter(a -> a.getValue().getName().equals(name)).mapToInt(Map.Entry::getKey).findFirst();
+    }
+
+    public OptionalInt findIdByDockerInstance(String instance) {
+        return apps.entrySet().stream().filter(a -> a.getValue().getDockerInstance().equals(instance)).mapToInt(Map.Entry::getKey).findFirst();
+    }
+
     @Override
     public Application save(Application app) {
         Objects.requireNonNull(app);

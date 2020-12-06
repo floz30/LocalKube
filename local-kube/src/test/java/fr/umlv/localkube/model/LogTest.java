@@ -8,6 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LogTest {
 
+    //TODO revoir les tests de la classe log
+
     @Test
     void shouldThrowNullPointerExceptionWhenTimestampIsNull() {
         assertThrows(NullPointerException.class, () -> new Log(0, 0, "", null));

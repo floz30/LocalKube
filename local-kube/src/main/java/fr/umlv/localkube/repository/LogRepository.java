@@ -58,10 +58,27 @@ public interface LogRepository {
     @RegisterConstructorMapper(Log.class)
     Optional<Log> findById(int id);
 
-//    List<Log> selectAllFromDuration(Duration minutes);
-//
-//    List<Log> selectAllFromDurationById(Duration minutes, int id);
-//
-//    List<Log> selectAllFromDurationByApp(Duration minutes, String app);
+    /**
+     * Retrieves all logs since the last {@code time} minutes.
+     * @param time timestamp
+     * @return all logs
+     */
+    @SqlQuery("SELECT * FROM log WHERE timestamp >= ?")
+    @RegisterConstructorMapper(Log.class)
+    List<Log> findAll(String time);
+
+    /**
+     * Retrieves all logs since the last {@code time} minutes and with the same specified id.
+     * @param time timestamp
+     * @param id id to search
+     * @return all logs
+     */
+    @SqlQuery("SELECT * FROM log WHERE timestamp >= ? and app_id = ?")
+    @RegisterConstructorMapper(Log.class)
+    List<Log> findAllFilterById(String time, int id);
+
+/*    @SqlQuery("SELECT * FROM log WHERE timestamp >= ? and app_id = ?")
+    @RegisterConstructorMapper(Log.class)
+    List<Log> findAllFilterByApp(String time, String app);*/
 
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+//TODO à voir si l'interface est toujours utile, sinon la supprimer
+
 @Repository
 public interface ApplicationRepository {
     /**
