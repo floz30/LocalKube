@@ -154,6 +154,10 @@ public class Application {
         return app.split(":")[0];
     }
 
+    public String getApp() {
+        return app;
+    }
+
     public int getPortService() {
         return portService;
     }

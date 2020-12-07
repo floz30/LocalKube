@@ -1,14 +1,16 @@
 package fr.umlv.localkube.services;
 
+import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.LogRepository;
 import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class LogService {
@@ -28,7 +30,7 @@ public class LogService {
     /**
      * Saves a given log.
      */
-    public void save(int appId, String message, Timestamp timestamp) {
+    public void save(int appId, String message, Instant timestamp) {
         repository.save(appId, message, timestamp);
     }
 
@@ -40,21 +42,16 @@ public class LogService {
         return repository.findAll();
     }
 
-    //TODO ajouter le filtrage des logs (GET /logs/:time), (GET /logs/:time/:filter) et (GET /logs/:time/:filter/:value)
-
-    public List<Log> selectAllFromDuration(int minutes) {
-        var timestamp = LocalDateTime.now().minusMinutes(minutes).toString();
-        return repository.findAll(timestamp);
+    public List<Log> selectAllFromDuration(Duration minutes) {
+        return repository.findAll(subtractMinutesToCurrentTime(minutes));
     }
 
-    public List<Log> selectAllFromDurationById(int minutes, int id) {
-        var timestamp = LocalDateTime.now().minusMinutes(minutes).toString();
-        return repository.findAllFilterById(timestamp, id);
+    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
+        return repository.findAllFilterById(subtractMinutesToCurrentTime(minutes), id);
     }
-    //
-    //    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
-    //        Objects.requireNonNull(minutes);
-    //        Objects.requireNonNull(app);
-    //        return jdbi.withHandle(handle -> handle.createQuery("SELECT * FROM log WHERE timestamp > DATETIME('now', '-" + minutes.toMinutes() + " minutes') AND app = '" + app + "'").map(this::mapToLog).list());
-    //    }
+
+    private Instant subtractMinutesToCurrentTime(Duration minutes){
+        return Instant.now().minusMillis(minutes.toMillis());
+    }
+
 }

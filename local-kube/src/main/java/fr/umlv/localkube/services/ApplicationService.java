@@ -32,7 +32,7 @@ public class ApplicationService implements ApplicationRepository {
     }
 
     public OptionalInt findIdByName(String name) {
-        return apps.entrySet().stream().filter(a -> a.getValue().getName().equals(name)).mapToInt(Map.Entry::getKey).findFirst();
+        return apps.entrySet().stream().filter(a -> a.getValue().getApp().equals(name)).mapToInt(Map.Entry::getKey).findFirst();
     }
 
     public OptionalInt findIdByDockerInstance(String instance) {
