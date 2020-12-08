@@ -2,7 +2,7 @@ package fr.umlv.localkube.component;
 
 import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.manager.DockerManager;
-import fr.umlv.localkube.repository.ApplicationRepository;
+import fr.umlv.localkube.services.ApplicationService;
 import fr.umlv.localkube.utils.OperatingSystem;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 public class Interceptor extends HandlerInterceptorAdapter {
 
     private final DockerManager dockerManager;
-    private final ApplicationRepository applicationService;
+    private final ApplicationService applicationService;
 
-    public Interceptor(DockerProperties properties,ApplicationRepository applicationService){
+    public Interceptor(DockerProperties properties, ApplicationService applicationService){
         super();
         this.dockerManager = new DockerManager(OperatingSystem.checkOS(), properties);
         this.applicationService = applicationService;
