@@ -62,16 +62,12 @@ public class LogController {
     public List<Log.LogApplication> listLogsSinceLastTimeMinutesAndFilter(@PathVariable int time,
                                                                           @PathVariable String filter, @PathVariable String value) {
         Duration minutes = Duration.ofMinutes(time);
-        switch (filter) {
-            case "byId":
-                return mapToLogApplication(service.selectAllFromDurationById(minutes, Integer.parseInt(value)));
-            case "byApp":
-                return mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByName(value).orElse(-1)));
-            case "byInstance":
-                return mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByDockerInstance(value).orElse(-1)));
-            default:
-                throw new IllegalArgumentException("Filter name unknown");
-        }
+        return switch (filter) {
+            case "byId" -> mapToLogApplication(service.selectAllFromDurationById(minutes, Integer.parseInt(value)));
+            case "byApp" -> mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByName(value).orElse(-1)));
+            case "byInstance" -> mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByDockerInstance(value).orElse(-1)));
+            default -> throw new IllegalArgumentException("Filter name unknown");
+        };
     }
 
     private List<Log.LogApplication> mapToLogApplication(List<Log> logs){

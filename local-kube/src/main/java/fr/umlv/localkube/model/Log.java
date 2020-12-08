@@ -1,16 +1,10 @@
 package fr.umlv.localkube.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonView;
 import fr.umlv.localkube.services.ApplicationService;
-import fr.umlv.localkube.services.LogService;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
-import org.springframework.lang.Nullable;
 
-import java.lang.reflect.AnnotatedParameterizedType;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 public record Log(int app_id,String message,Instant timestamp) {

@@ -131,7 +131,7 @@ public class DockerManager {
 
     public String[] listDeadContainers() throws IOException, InterruptedException {
         var listCommand = new ProcessBuilder();
-        listCommand.command(os.getCMD(), os.getOption(), "docker ps -f 'status=exited' --format '{{.Names}}'");
+        listCommand.command(os.getCMD(), os.getOption(), "docker ps -f \"status=exited\" --format '{{.Names}}'");
         var names = testExitValue(listCommand.start());
         if(names.length()<1){
             return new String[0];
