@@ -1,7 +1,6 @@
 package fr.umlv.localkube.repository;
 
 import fr.umlv.localkube.model.Log;
-import org.jdbi.v3.sqlobject.config.RegisterConstructorMapper;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 import org.jdbi.v3.sqlobject.statement.SqlUpdate;
 import org.springframework.stereotype.Repository;
@@ -37,7 +36,6 @@ public interface LogRepository {
      * Saves a given log.
      */
     @SqlUpdate("INSERT INTO log(app_id, message, timestamp) VALUES (?, ?, ?)")
-    @RegisterConstructorMapper(Log.class)
     void save(int app_id, String message, Instant timestamp);
 
     /**
@@ -45,7 +43,6 @@ public interface LogRepository {
      * @return all logs
      */
     @SqlQuery("SELECT app_id,message,timestamp  FROM log")
-    @RegisterConstructorMapper(Log.class)
     List<Log> findAll();
 
     /**
@@ -54,7 +51,6 @@ public interface LogRepository {
      * @return all logs
      */
     @SqlQuery("SELECT app_id,message,timestamp  FROM log WHERE timestamp >= ?")
-    @RegisterConstructorMapper(Log.class)
     List<Log> findAll(Instant time);
 
     /**
@@ -64,7 +60,6 @@ public interface LogRepository {
      * @return all logs
      */
     @SqlQuery("SELECT app_id,message,timestamp FROM log WHERE timestamp >= ? and app_id = ?")
-    @RegisterConstructorMapper(Log.class)
     List<Log> findAllFilterById(Instant time, int id);
 
 }

@@ -4,6 +4,7 @@ import fr.umlv.localkube.model.Application;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService {
@@ -16,7 +17,7 @@ public class ApplicationService {
      */
     public void delete(Application app) {
         Objects.requireNonNull(app);
-        apps.remove(app.getId());
+        app.kill();
     }
 
     /**
@@ -24,7 +25,7 @@ public class ApplicationService {
      * @return a list of Application
      */
     public List<Application> findAll() {
-        return new ArrayList<>(apps.values());
+        return apps.values().stream().filter(application -> application.isAlive()).collect(Collectors.toList());
     }
 
     /**

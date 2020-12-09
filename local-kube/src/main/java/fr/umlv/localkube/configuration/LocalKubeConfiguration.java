@@ -1,7 +1,9 @@
 package fr.umlv.localkube.configuration;
 
 import fr.umlv.localkube.component.Interceptor;
+import fr.umlv.localkube.utils.LogMapper;
 import fr.umlv.localkube.repository.LogRepository;
+import fr.umlv.localkube.services.ApplicationService;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Connector;
 import org.jdbi.v3.core.Jdbi;
@@ -62,10 +64,11 @@ public class LocalKubeConfiguration implements WebMvcConfigurer {
     }
 
     @Bean
-    public Jdbi createJdbi(DataBaseProperties properties) {
+    public Jdbi createJdbi(DataBaseProperties properties,ApplicationService applicationService) {
         var db =  Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword());
         db.installPlugin(new SQLitePlugin());
         db.installPlugin(new SqlObjectPlugin());
+        db.registerRowMapper(new LogMapper(applicationService));
         return db;
     }
 

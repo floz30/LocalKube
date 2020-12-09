@@ -34,45 +34,40 @@ public class LogController {
     }
 
     @GetMapping("/logs")
-    public List<Log.LogApplication> list() {
-        return mapToLogApplication(service.findAll());
+    public List<Log> list() {
+        return service.findAll();
     }
 
 
     @GetMapping("/logs/{time}")
-    public List<Log.LogApplication> listLogsSinceLastTimeMinutes(@PathVariable int time) {
-        return mapToLogApplication(service.selectAllFromDuration( Duration.ofMinutes(time)));
+    public List<Log> listLogsSinceLastTimeMinutes(@PathVariable int time) {
+        return service.selectAllFromDuration( Duration.ofMinutes(time));
     }
 
     @GetMapping(path = "/logs/{time}/{filter}")
     @ResponseBody
-    public List<Log.LogApplication> listLogsSinceLastTimeMinutesAndFilter(@PathVariable int time,
+    public List<Log> listLogsSinceLastTimeMinutesAndFilter(@PathVariable int time,
                                                                           @PathVariable String filter) {
         Duration minutes = Duration.ofMinutes(time);
         if (filter.contains(":")) {
-            return mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByName(filter).orElse(-1)));
+            return service.selectAllFromDurationById(minutes, applicationService.findIdByName(filter).orElse(-1));
         } else if (filter.contains("_")) {
-            return mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByDockerInstance(filter).orElse(-1)));
+            return service.selectAllFromDurationById(minutes, applicationService.findIdByDockerInstance(filter).orElse(-1));
         }
-        return mapToLogApplication(service.selectAllFromDurationById(minutes, Integer.parseInt(filter)));
+        return service.selectAllFromDurationById(minutes, Integer.parseInt(filter));
     }
 
     @GetMapping(path = "/logs/{time}/{filter}/{value}")
     @ResponseBody
-    public List<Log.LogApplication> listLogsSinceLastTimeMinutesAndFilter(@PathVariable int time,
+    public List<Log> listLogsSinceLastTimeMinutesAndFilter(@PathVariable int time,
                                                                           @PathVariable String filter, @PathVariable String value) {
         Duration minutes = Duration.ofMinutes(time);
         return switch (filter) {
-            case "byId" -> mapToLogApplication(service.selectAllFromDurationById(minutes, Integer.parseInt(value)));
-            case "byApp" -> mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByName(value).orElse(-1)));
-            case "byInstance" -> mapToLogApplication(service.selectAllFromDurationById(minutes, applicationService.findIdByDockerInstance(value).orElse(-1)));
+            case "byId" -> service.selectAllFromDurationById(minutes, Integer.parseInt(value));
+            case "byApp" -> service.selectAllFromDurationById(minutes, applicationService.findIdByName(value).orElse(-1));
+            case "byInstance" -> service.selectAllFromDurationById(minutes, applicationService.findIdByDockerInstance(value).orElse(-1));
             default -> throw new IllegalArgumentException("Filter name unknown");
         };
     }
-
-    private List<Log.LogApplication> mapToLogApplication(List<Log> logs){
-        return logs.stream().map(log -> log.toLogApplication(applicationService)).collect(Collectors.toList());
-    }
-
 
 }

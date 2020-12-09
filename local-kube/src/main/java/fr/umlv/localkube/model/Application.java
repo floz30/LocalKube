@@ -1,6 +1,5 @@
 package fr.umlv.localkube.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -9,6 +8,7 @@ import java.net.ServerSocket;
 import java.util.Calendar;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class Application {
 
@@ -57,6 +57,8 @@ public class Application {
     @JsonProperty("elapsed-time")
     @JsonView(View.OnListAndStop.class)
     private String elapsedTime;
+
+    private boolean alive;
 
     public static class ApplicationBuilder {
         private int id;
@@ -121,26 +123,9 @@ public class Application {
         this.portApp = portApp;
         this.portService = portService;
         this.dockerInstance = dockerInstance;
+        this.alive=true;
     }
 
-    private static int getAvailablePortService() throws IOException {
-        var port = MIN_PORT_SERVICE-1;
-        while (port < MAX_PORT_SERVICE+1) {
-            try {
-                port++;
-                var s = new ServerSocket(port);
-                s.close();
-                break;
-            } catch (IOException ignored){
-            }
-        }
-        if (port > MAX_PORT_SERVICE) {
-            throw new IOException("no available private port found");
-        }
-        return port;
-    }
-
-    @JsonIgnore
     public String getJarName() {
         return getName() + ".jar";
     }
@@ -149,13 +134,20 @@ public class Application {
         return id;
     }
 
-    @JsonIgnore
     public String getName() {
         return app.split(":")[0];
     }
 
     public String getApp() {
         return app;
+    }
+
+    public void kill(){
+        this.alive = false;
+    }
+
+    public boolean isAlive() {
+        return alive;
     }
 
     public int getPortService() {
@@ -173,6 +165,19 @@ public class Application {
     public String getElapsedTime() {
         elapsedTime = formatElapsedTime(System.currentTimeMillis());
         return elapsedTime;
+    }
+
+    private static int getAvailablePortService() {
+        return IntStream.range(MIN_PORT_SERVICE,MAX_PORT_SERVICE+1).filter(Application::testPortAvailability).findFirst().orElseThrow();
+    }
+
+    private static boolean testPortAvailability(int port) {
+        try{
+            new ServerSocket(port).close();
+        }catch (IOException e){
+            return false;
+        }
+        return true;
     }
 
     private static int getPortFromName(String app) {
