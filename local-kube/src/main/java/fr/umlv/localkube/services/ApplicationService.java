@@ -8,7 +8,6 @@ import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.utils.OperatingSystem;
-import org.apache.catalina.LifecycleException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -29,10 +28,18 @@ public class ApplicationService {
     }
 
     /**
-     * Saves a given application.
-     * @param app application to save
-     * @return the saved application
-     * @throws NullPointerException in case the given application is null
+     * Start a given application.
+     *
+     * @param app the application to start
+     * @return the launched application
+     * @throws IOException                     if an I/O exception occurs
+     * @throws InvalidImageReferenceException  when attempting to parse an invalid image reference
+     * @throws InterruptedException            if the execution was interrupted
+     * @throws ExecutionException              if some other exception occurred during execution
+     * @throws RegistryException               if some other error occurred while interacting with a registry
+     * @throws CacheDirectoryCreationException if a directory to be used for the cache could not be created
+     * @see #dockerManager
+     * @see #configuration
      */
     public Application start(Application app) throws InterruptedException, ExecutionException, IOException, InvalidImageReferenceException, CacheDirectoryCreationException, RegistryException {
         Objects.requireNonNull(app);
@@ -43,11 +50,17 @@ public class ApplicationService {
     }
 
     /**
-     * Deletes a given application.
-     * @param app application to delete
+     * Shutdown a given application.
+     *
+     * @param app application to stop
+     * @return the stopped application
      * @throws NullPointerException in case the given application is null
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the execution was interrupted
+     * @see #dockerManager
+     * @see #configuration
      */
-    public Application stop(Application app) throws IOException, InterruptedException, LifecycleException {
+    public Application stop(Application app) throws IOException, InterruptedException {
         Objects.requireNonNull(app);
         dockerManager.stopContainer(app);
         configuration.removeServicePort(app.getPortService());
@@ -60,7 +73,7 @@ public class ApplicationService {
      * @return a list of Application
      */
     public List<Application> list() {
-        return apps.values().stream().filter(application -> application.isAlive()).collect(Collectors.toList());
+        return apps.values().stream().filter(Application::isAlive).collect(Collectors.toList());
     }
 
     /**
@@ -121,6 +134,9 @@ public class ApplicationService {
 
     /**
      * Removes all applications that have their dockerInstance in array.
+     *
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the execution was interrupted
      */
     public void removeAllDeadDockerInstance() throws IOException, InterruptedException {
         var instances = dockerManager.listDeadContainers();
@@ -133,6 +149,12 @@ public class ApplicationService {
         dockerManager.removeAll(instances);
     }
 
+    /**
+     * Shutdown all applications still alive.
+     *
+     * @throws IOException          if an I/O error occurs
+     * @throws InterruptedException if the execution was interrupted
+     */
     public void stopAll() throws IOException, InterruptedException {
         for (var application : list()) {
             dockerManager.stopContainer(application);
@@ -145,11 +167,6 @@ public class ApplicationService {
      */
     public int size() {
         return apps.size();
-    }
-
-    @Override
-    public String toString() {
-        return apps.toString();
     }
 
 }

@@ -22,44 +22,50 @@ public class Application {
     private final long startTime = System.currentTimeMillis();
 
     /**
-     * Application ID
+     * Application ID.
      */
     @JsonProperty("id")
     @JsonView(View.OnStart.class)
     private final int id;
     /**
-     * Application name
+     * Application name.
      */
     @JsonProperty("app")
     @JsonView(View.OnStart.class)
     private final String app;
     /**
-     * Application public port
+     * Application public port.
      */
     @JsonProperty("port")
     @JsonView(View.OnStart.class)
     private final int portApp;
     /**
-     * Application service/private port
+     * Application service/private port.
      */
     @JsonProperty("service-port")
     @JsonView(View.OnStart.class)
     private final int portService;
     /**
-     * Docker instance name
+     * Docker instance name.
      */
     @JsonProperty("docker-instance")
     @JsonView(View.OnStart.class)
     private final String dockerInstance;
     /**
-     * Elapsed time since application launch
+     * Elapsed time since application launch.
      */
     @JsonProperty("elapsed-time")
     @JsonView(View.OnListAndStop.class)
     private String elapsedTime;
 
+    /**
+     * Application is still alive ?
+     */
     private boolean alive;
 
+    /**
+     * Builder is only use in unit tests.
+     */
     public static class ApplicationBuilder {
         private int id;
         private String app;
@@ -105,7 +111,17 @@ public class Application {
         }
     }
 
-    public static Application initializeApp(String app, int id) throws IOException {
+    /**
+     * Creates and initializes a new application from his name and his ID.
+     * This method will retrieve port from the name, calculate service port and
+     * create the name for docker instance.
+     *
+     * @param app the name of this new application with his port separated by ":"
+     * @param id  ID of this new application
+     * @return    the new application with its fields initialized
+     * @throws IllegalArgumentException if {@code ID} is negative or zero
+     */
+    public static Application initializeApp(String app, int id) {
         if (id <= 0) {
             throw new IllegalArgumentException("id can't be negative");
         }
@@ -125,49 +141,101 @@ public class Application {
         this.alive=true;
     }
 
+    /**
+     * Returns filename with .jar extension of this application.
+     *
+     * @return the filename of jar file
+     * @see    #getName()
+     */
     public String getJarName() {
         return getName() + ".jar";
     }
 
+    /**
+     * Returns ID of this application.
+     *
+     * @return ID of this application
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Returns name of this application without the port.
+     *
+     * @return the name of this application
+     * @see    #getApp()
+     */
     public String getName() {
         return app.split(":")[0];
     }
 
+    /**
+     * Returns name of this application with the port separated by ":".
+     *
+     * @return the name of this application with his port
+     * @see    #getName()
+     */
     public String getApp() {
         return app;
     }
 
+    /**
+     * Kill this application.
+     * @see #alive
+     */
     public void kill(){
         this.alive = false;
     }
 
+    /**
+     * Returns {@code true} if this application is still alive, otherwise returns {@code false}.
+     *
+     * @return
+     */
     public boolean isAlive() {
         return alive;
     }
 
+    /**
+     * Returns service port of this application.
+     *
+     * @return the service port
+     */
     public int getPortService() {
         return portService;
     }
 
+    /**
+     * Returns public port of this application.
+     *
+     * @return the public port
+     */
     public int getPortApp() {
         return portApp;
     }
 
+    /**
+     * Returns the name of the docker instance of this application.
+     *
+     * @return the docker instance
+     */
     public String getDockerInstance() {
         return dockerInstance;
     }
 
+    /**
+     * Returns elapsed time since this application started.
+     *
+     * @return the elapsed time
+     */
     public String getElapsedTime() {
         elapsedTime = formatElapsedTime(System.currentTimeMillis());
         return elapsedTime;
     }
 
     private static int getAvailablePortService() {
-        return IntStream.range(MIN_PORT_SERVICE,MAX_PORT_SERVICE+1).filter(Application::testPortAvailability).findFirst().orElseThrow();
+        return IntStream.range(MIN_PORT_SERVICE, MAX_PORT_SERVICE+1).filter(Application::testPortAvailability).findFirst().orElseThrow();
     }
 
     private static boolean testPortAvailability(int port) {
