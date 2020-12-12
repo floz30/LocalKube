@@ -14,7 +14,35 @@ public class ApplicationTest {
 
     @Test @Tag("initializeApp")
     void shouldThrowIllegalArgumentExceptionInInitialize() {
-        assertThrows(IllegalArgumentException.class, () -> Application.initializeApp(null, 0));
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> Application.initializeApp(null, 0)),
+                () -> assertThrows(IllegalArgumentException.class, () -> Application.initializeApp(null, -5)),
+                () -> assertThrows(IllegalArgumentException.class, () -> Application.initializeApp("demo:8081", 0))
+        );
+    }
+
+    @Test @Tag("getJarName")
+    void shouldReturnCorrectJarFilename() {
+        var app = new Application.ApplicationBuilder()
+                .setApp("demo:8081")
+                .setId(1)
+                .build();
+
+        var actual = app.getJarName();
+
+        assertEquals("demo.jar", actual);
+    }
+
+    @Test @Tag("getName")
+    void shouldReturnCorrectName() {
+        var app = new Application.ApplicationBuilder()
+                .setApp("demo:8081")
+                .setId(1)
+                .build();
+
+        var actual = app.getName();
+
+        assertEquals("demo", actual);
     }
 
 }

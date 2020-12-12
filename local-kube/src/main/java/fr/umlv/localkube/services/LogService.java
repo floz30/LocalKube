@@ -1,43 +1,73 @@
 package fr.umlv.localkube.services;
 
-import fr.umlv.localkube.configuration.DataBaseProperties;
-import fr.umlv.localkube.manager.LogDataBaseManager;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.LogRepository;
-import org.springframework.stereotype.Repository;
+import org.jdbi.v3.core.Jdbi;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
-@Repository
-public class LogService implements LogRepository {
-    private final LogDataBaseManager logManager;
+@Service
+public class LogService {
+    private final Jdbi dataBase;
+    private final LogRepository repository;
 
-    public LogService(DataBaseProperties properties){
-        this.logManager = LogDataBaseManager.initialize(properties);
+    private LogService(Jdbi dataBase, LogRepository repository){
+        this.dataBase = dataBase;
+        this.repository = repository;
     }
 
-    @Override
-    public void save(Log log) {
-        logManager.insertLog(log.appId(), log.message(), log.timestamp());
+    @PostConstruct
+    private void init() {
+        repository.init();
     }
 
-    @Override
+    /**
+     * Saves a given log.
+     *
+     * @param appId     ID of the application that issued this log
+     * @param message   message to save
+     * @param timestamp timestamp the log was issued
+     */
+    public void save(int appId, String message, Instant timestamp) {
+        repository.save(appId, message, timestamp);
+    }
+
+    /**
+     * Returns all instances of log.
+     *
+     * @return a list of {@code Log}
+     */
     public List<Log> findAll() {
-        return logManager.selectAll();
+        return repository.findAll();
     }
 
-//    @Override
-//    public List<Log> selectAllFromDuration(Duration minutes) {
-//        return logManager.selectAllFromDuration(minutes);
-//    }
-//
-//    @Override
-//    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
-//        return logManager.selectAllFromDurationById(minutes, id);
-//    }
-//
-//    @Override
-//    public List<Log> selectAllFromDurationByApp(Duration minutes, String app) {
-//        return logManager.selectAllFromDurationByApp(minutes, app);
-//    }
+    /**
+     * Returns all logs who was issued since last {@code time} minutes.
+     *
+     * @param minutes
+     * @return a list of {@code Log}
+     */
+    public List<Log> selectAllFromDuration(Duration minutes) {
+        return repository.findAll(subtractMinutesToCurrentTime(minutes));
+    }
+
+    /**
+     * Returns all logs who was issued since last {@code time} minutes for the application with its ID equals to {@code id}.
+     *
+     * @param minutes
+     * @param id ID of the application
+     * @return a list of {@code Log}
+     */
+    public List<Log> selectAllFromDurationById(Duration minutes, int id) {
+        return repository.findAllFilterById(subtractMinutesToCurrentTime(minutes), id);
+    }
+
+    private Instant subtractMinutesToCurrentTime(Duration minutes){
+        return Instant.now().minusMillis(minutes.toMillis());
+    }
+
 }
