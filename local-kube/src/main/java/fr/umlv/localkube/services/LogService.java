@@ -1,6 +1,5 @@
 package fr.umlv.localkube.services;
 
-import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.LogRepository;
 import org.jdbi.v3.core.Jdbi;
@@ -10,15 +9,14 @@ import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class LogService {
-    private final Jdbi db;
+    private final Jdbi dataBase;
     private final LogRepository repository;
 
-    private LogService(Jdbi db, LogRepository repository){
-        this.db = db;
+    private LogService(Jdbi dataBase, LogRepository repository){
+        this.dataBase = dataBase;
         this.repository = repository;
     }
 

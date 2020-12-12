@@ -1,72 +1,82 @@
 package fr.umlv.localkube.services;
 
+import com.google.cloud.tools.jib.api.CacheDirectoryCreationException;
+import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
+import com.google.cloud.tools.jib.api.RegistryException;
+import fr.umlv.localkube.configuration.DockerProperties;
+import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.model.Application;
+import org.apache.catalina.LifecycleException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationServiceTest {
 
     private ApplicationService service;
+    private DockerProperties properties;
+    private LocalKubeConfiguration configuration;
 
     @BeforeEach
     void setUp() {
-        service = new ApplicationService();
+        service = new ApplicationService(configuration,properties);
     }
 
     @Test @Tag("delete")
     void shouldThrowNullPointerExceptionWhenRemoveNull() {
-        assertThrows(NullPointerException.class, () -> service.delete(null));
+        assertThrows(NullPointerException.class, () -> service.stop(null));
     }
 
     @Test @Tag("delete")
-    void shouldRemoveSpecifiedApplication() {
+    void shouldRemoveSpecifiedApplication() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException, LifecycleException {
         var app = new Application.ApplicationBuilder().buildRandom();
-        service.save(app);
+        service.start(app);
 
-        service.delete(app);
+        service.stop(app);
 
         assertEquals(0, service.size());
     }
 
     @Test @Tag("delete")
-    void shouldRemoveOnlySpecifiedApplication() {
+    void shouldRemoveOnlySpecifiedApplication() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException, LifecycleException {
         var app_1 = new Application.ApplicationBuilder().setId(1).build();
         var app_2 = new Application.ApplicationBuilder().setId(2).build();
-        service.save(app_1);
-        service.save(app_2);
+        service.start(app_1);
+        service.start(app_2);
 
-        service.delete(app_1);
+        service.stop(app_1);
 
         var expected = new ArrayList<Application>();
         expected.add(app_2);
         assertAll(
                 () -> assertEquals(1, service.size()),
-                () -> assertEquals(expected, service.findAll())
+                () -> assertEquals(expected, service.list())
         );
     }
 
     @Test @Tag("findAll")
     void shouldReturnEmptyList() {
-        assertEquals(new ArrayList<Application>(), service.findAll());
+        assertEquals(new ArrayList<Application>(), service.list());
     }
 
     @Test @Tag("findAll")
-    void shouldReturnAllSavedApplication() {
+    void shouldReturnAllSavedApplication() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var expected = new ArrayList<Application>();
         for (var i = 1; i < 20; i++) {
             var app = new Application.ApplicationBuilder().setId(i).build();
             expected.add(app);
-            service.save(app);
+            service.start(app);
         }
 
         assertAll(
                 () -> assertEquals(19, service.size()),
-                () -> assertEquals(expected, service.findAll())
+                () -> assertEquals(expected, service.list())
         );
     }
 
@@ -76,10 +86,10 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findAppIdByPortService")
-    void shouldThrowIllegalStateExceptionWhenNoAppMatches() {
+    void shouldThrowIllegalStateExceptionWhenNoAppMatches() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         for (var i = 1; i < 20; i++) {
             var app = new Application.ApplicationBuilder().setId(i).setportService(i+5000).build();
-            service.save(app);
+            service.start(app);
         }
 
         assertThrows(IllegalStateException.class, () -> service.findAppIdByPortService(300));
@@ -93,10 +103,10 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findById")
-    void shouldNotFindAppWithFalseId() {
+    void shouldNotFindAppWithFalseId() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         for (var i = 1; i < 20; i++) {
             var app = new Application.ApplicationBuilder().setId(i).build();
-            service.save(app);
+            service.start(app);
         }
 
         var result = service.findById(99);
@@ -105,9 +115,9 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findById")
-    void shouldReturnApp() {
+    void shouldReturnApp() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var app = new Application.ApplicationBuilder().buildRandom();
-        service.save(app);
+        service.start(app);
 
         var result = service.findById(app.getId());
 
@@ -115,10 +125,10 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findById")
-    void shouldReturnCorrectApp() {
+    void shouldReturnCorrectApp() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         for (var i = 1; i < 20; i++) {
             var app = new Application.ApplicationBuilder().setId(i).build();
-            service.save(app);
+            service.start(app);
         }
 
         var result = service.findById(5);
@@ -134,10 +144,10 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findIdByDockerInstance")
-    void shouldNotFindIdByInstanceWithFalseInstance() {
+    void shouldNotFindIdByInstanceWithFalseInstance() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         for (var i = 1; i < 20; i++) {
             var app = new Application.ApplicationBuilder().setId(i).setDockerInstance("demo_"+(i+8000)).build();
-            service.save(app);
+            service.start(app);
         }
 
         var result = service.findIdByDockerInstance("demo_8081");
@@ -146,9 +156,9 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findIdByDockerInstance")
-    void shouldReturnIdByInstance() {
+    void shouldReturnIdByInstance() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var app = new Application.ApplicationBuilder().buildRandom();
-        service.save(app);
+        service.start(app);
 
         var result = service.findIdByDockerInstance(app.getDockerInstance());
 
@@ -163,10 +173,10 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findIdByName")
-    void shouldNotFindIdByNameWithFalseInstance() {
+    void shouldNotFindIdByNameWithFalseInstance() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         for (var i = 1; i < 20; i++) {
             var app = new Application.ApplicationBuilder().setId(i).setApp("demo:"+(i+8000)).build();
-            service.save(app);
+            service.start(app);
         }
 
         var result = service.findIdByName("demo:8081");
@@ -175,9 +185,9 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("findIdByName")
-    void shouldReturnIdByName() {
+    void shouldReturnIdByName() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var app = new Application.ApplicationBuilder().buildRandom();
-        service.save(app);
+        service.start(app);
 
         var result = service.findIdByName(app.getApp());
 
@@ -197,8 +207,8 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("getNextId")
-    void shouldReturnReturnSix() {
-        service.save(new Application.ApplicationBuilder().setId(5).build());
+    void shouldReturnReturnSix() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
+        service.start(new Application.ApplicationBuilder().setId(5).build());
         var result = service.getNextId();
 
         assertEquals(6, result);
@@ -209,16 +219,16 @@ public class ApplicationServiceTest {
     @Test @Tag("save")
     void shouldThrowNullPointerExceptionWhenSaveNullApp() {
         assertAll(
-                () -> assertThrows(NullPointerException.class, () -> service.save(null)),
+                () -> assertThrows(NullPointerException.class, () -> service.start(null)),
                 () -> assertEquals(0, service.size())
         );
     }
 
     @Test @Tag("save")
-    void shouldSaveAndReturnApplication() {
+    void shouldSaveAndReturnApplication() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var app = new Application.ApplicationBuilder().buildRandom();
 
-        var actual = service.save(app);
+        var actual = service.start(app);
 
         assertAll(
                 () -> assertEquals(actual, app),
@@ -227,9 +237,9 @@ public class ApplicationServiceTest {
     }
 
     @Test @Tag("size")
-    void shouldReturnGoodSize() {
+    void shouldReturnGoodSize() throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
         for (var i = 1; i < 20; i++) {
-            service.save(new Application.ApplicationBuilder().buildRandom());
+            service.start(new Application.ApplicationBuilder().buildRandom());
         }
 
         assertEquals(19, service.size());

@@ -19,13 +19,12 @@ public class DockerManager {
     private final OperatingSystem os;
     private final DockerProperties properties;
 
-
     public DockerManager(OperatingSystem os, DockerProperties properties) {
         this.os = os;
         this.properties = properties;
     }
 
-    public void start(Application application) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
+    public void startContainer(Application application) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         if (checksIfJarFileExists(application)) {
             if (!checksIfDockerImageExists(application)) {
                 createImage(application);
@@ -35,6 +34,46 @@ public class DockerManager {
             return;
         }
         throw new FileNotFoundException("application jar file not found for " + application);
+    }
+
+    /**
+     * Stops container thanks to his name.
+     *
+     * @param application Application that must be stopped
+     * @throws IOException If an I/O error occurs
+     */
+    public void stopContainer(Application application) throws IOException, InterruptedException {
+        removeContainer(application.getDockerInstance());
+    }
+
+    public void removeAll(String[] names) throws IOException, InterruptedException {
+        for(String name : names){
+            removeContainer(name);
+        }
+    }
+
+    public String[] listDeadContainers() throws IOException, InterruptedException {
+        var listCommand = new ProcessBuilder();
+        listCommand.command(os.getCMD(), os.getOption(), "docker ps -f \"status=exited\" --format '{{.Names}}'");
+        var names = testExitValue(listCommand.start());
+        if(names.length()<1){
+            return new String[0];
+        }
+        return names.split("\n");
+    }
+
+    /**
+     * Load an image from a file in /docker-images/ directory.
+     * The image name is the application's name
+     *
+     * @param application Initialized application
+     * @throws IOException If an I/O error occurs
+     */
+    private void loadImage(Application application) throws IOException, InterruptedException {
+        var loadCommand = new ProcessBuilder();
+        loadCommand.command(os.getCMD(), os.getOption(), " docker load < " + application.getName());
+        loadCommand.directory(new File(getPathToDockerImage("").toString())); // on se place dans le répertoire des images
+        testExitValue(loadCommand.start());
     }
 
     /**
@@ -48,7 +87,7 @@ public class DockerManager {
      * @throws RegistryException
      * @throws CacheDirectoryCreationException
      */
-    public void createImage(Application application) throws InvalidImageReferenceException, IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
+    private void createImage(Application application) throws InvalidImageReferenceException, IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException {
         Jib.from("openjdk:15")
                 .addLayer(Arrays.asList(getPathToJarFile(application.getJarName()), getPathToLibrary()), AbsoluteUnixPath.get("/"))
                 .containerize(Containerizer.to(TarImage.at(getPathToDockerImage(application.getName())).named(application.getName())));
@@ -74,19 +113,8 @@ public class DockerManager {
         return Files.exists(getPathToJarFile(application.getJarName()));
     }
 
-    /**
-     * Load an image from a file in /docker-images/ directory.
-     * The image name is the application's name
-     *
-     * @param application Initialized application
-     * @throws IOException If an I/O error occurs
-     */
-    public void loadImage(Application application) throws IOException, InterruptedException {
-        var loadCommand = new ProcessBuilder();
-        loadCommand.command(os.getCMD(), os.getOption(), " docker load < " + application.getName());
-        loadCommand.directory(new File(getPathToDockerImage("").toString())); // on se place dans le répertoire des images
-        testExitValue(loadCommand.start());
-    }
+
+
 
     /**
      * Run a docker on specified port.
@@ -95,7 +123,7 @@ public class DockerManager {
      * @throws IOException
      * @throws InterruptedException
      */
-    public void runDockerImage(Application application) throws IOException, InterruptedException {
+    private void runDockerImage(Application application) throws IOException, InterruptedException {
         var runCommand = new ProcessBuilder();
         runCommand.command(os.getCMD(),
                 os.getOption(),
@@ -103,40 +131,10 @@ public class DockerManager {
         testExitValue(runCommand.start());
     }
 
-    /**
-     * Stops container thanks to his name.
-     *
-     * @param application Application that must be stopped
-     * @throws IOException If an I/O error occurs
-     */
-    public void stopContainer(Application application) throws IOException, InterruptedException {
-        removeContainer(application.getDockerInstance());
-    }
-
-    public void stopContainer(String name) throws IOException, InterruptedException {
-        removeContainer(name);
-    }
-
     private void removeContainer(String name) throws IOException, InterruptedException {
         var stopCommand = new ProcessBuilder();
         stopCommand.command(os.getCMD(), os.getOption(), " docker rm -f " + name);
         testExitValue(stopCommand.start());
-    }
-
-    public void removeAll(String[] names) throws IOException, InterruptedException {
-        for(String name : names){
-            removeContainer(name);
-        }
-    }
-
-    public String[] listDeadContainers() throws IOException, InterruptedException {
-        var listCommand = new ProcessBuilder();
-        listCommand.command(os.getCMD(), os.getOption(), "docker ps -f \"status=exited\" --format '{{.Names}}'");
-        var names = testExitValue(listCommand.start());
-        if(names.length()<1){
-            return new String[0];
-        }
-        return names.split("\n");
     }
 
     private String testExitValue(Process process) throws InterruptedException, IOException {

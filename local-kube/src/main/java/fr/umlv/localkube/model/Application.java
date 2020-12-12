@@ -103,7 +103,6 @@ public class Application {
             this.dockerInstance = dockerInstance;
             return this;
         }
-
     }
 
     public static Application initializeApp(String app, int id) throws IOException {

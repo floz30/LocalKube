@@ -1,30 +1,65 @@
 package fr.umlv.localkube.services;
 
+import com.google.cloud.tools.jib.api.CacheDirectoryCreationException;
+import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
+import com.google.cloud.tools.jib.api.RegistryException;
+import fr.umlv.localkube.configuration.DockerProperties;
+import fr.umlv.localkube.configuration.LocalKubeConfiguration;
+import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Application;
+import fr.umlv.localkube.utils.OperatingSystem;
+import org.apache.catalina.LifecycleException;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService {
     private final Map<Integer, Application> apps = new HashMap<>();
+    private final DockerManager dockerManager;
+    private final LocalKubeConfiguration configuration;
+
+    public ApplicationService(@Lazy LocalKubeConfiguration configuration, DockerProperties dockerProperties){
+        this.dockerManager = new DockerManager(OperatingSystem.checkOS(),dockerProperties);
+        this.configuration = configuration;
+    }
+
+    /**
+     * Saves a given application.
+     * @param app application to save
+     * @return the saved application
+     * @throws NullPointerException in case the given application is null
+     */
+    public Application start(Application app) throws InterruptedException, ExecutionException, IOException, InvalidImageReferenceException, CacheDirectoryCreationException, RegistryException {
+        Objects.requireNonNull(app);
+        dockerManager.startContainer(app);
+        configuration.addServicePort(app.getPortService());
+        apps.put(app.getId(), app);
+        return app;
+    }
 
     /**
      * Deletes a given application.
      * @param app application to delete
      * @throws NullPointerException in case the given application is null
      */
-    public void delete(Application app) {
+    public Application stop(Application app) throws IOException, InterruptedException, LifecycleException {
         Objects.requireNonNull(app);
+        dockerManager.stopContainer(app);
+        configuration.removeServicePort(app.getPortService());
         app.kill();
+        return app;
     }
 
     /**
      * Returns a list of all applications launched.
      * @return a list of Application
      */
-    public List<Application> findAll() {
+    public List<Application> list() {
         return apps.values().stream().filter(application -> application.isAlive()).collect(Collectors.toList());
     }
 
@@ -86,27 +121,22 @@ public class ApplicationService {
 
     /**
      * Removes all applications that have their dockerInstance in array.
-     * @param instances array of dockerInstance
      */
-    public void removeAllByDockerInstanceName(String[] instances) {
+    public void removeAllDeadDockerInstance() throws IOException, InterruptedException {
+        var instances = dockerManager.listDeadContainers();
         for (String instance : instances){
             apps.values().stream()
                     .filter(application -> application.getDockerInstance().equals(instance))
                     .findFirst()
                     .ifPresent(application -> apps.remove(application.getId()));
         }
+        dockerManager.removeAll(instances);
     }
 
-    /**
-     * Saves a given application.
-     * @param app application to save
-     * @return the saved application
-     * @throws NullPointerException in case the given application is null
-     */
-    public Application save(Application app) {
-        Objects.requireNonNull(app);
-        apps.put(app.getId(), app);
-        return app;
+    public void stopAll() throws IOException, InterruptedException {
+        for (var application : list()) {
+            dockerManager.stopContainer(application);
+        }
     }
 
     /**

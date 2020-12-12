@@ -23,9 +23,7 @@ import java.util.concurrent.ExecutionException;
 @RestController
 public class ApplicationController {
 
-    private final ApplicationService repository;
-    private final DockerManager dockerManager;
-    private final LocalKubeConfiguration configuration;
+    private final ApplicationService applicationService;
 
     /**
      * Contains data from JSON when we want start a new application.
@@ -42,44 +40,32 @@ public class ApplicationController {
     private record StopApplicationData(@JsonProperty("id") int id) {
     }
 
-    public ApplicationController(ApplicationService repository, LocalKubeConfiguration configuration, DockerProperties properties) {
-        this.repository = repository;
-        this.dockerManager = new DockerManager(OperatingSystem.checkOS(), properties);
-        this.configuration = configuration;
+    public ApplicationController(ApplicationService applicationService) {
+        this.applicationService = applicationService;
     }
 
     @JsonView(Application.View.OnStart.class)
     @PostMapping(path = "/app/start")
     public Application start(@RequestBody StartApplicationData data) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
-        int id = repository.getNextId();
-        var application = Application.initializeApp(data.app(), id);
-        dockerManager.start(application);
-        configuration.addServicePort(application.getPortService());
-        return repository.save(application);
+        var application = Application.initializeApp(data.app(), applicationService.getNextId());
+        return applicationService.start(application);
     }
 
     @JsonView(Application.View.OnListAndStop.class)
     @GetMapping("/app/list")
     public List<Application> list() {
-        return repository.findAll();
+        return applicationService.list();
     }
 
     @JsonView(Application.View.OnListAndStop.class)
     @PostMapping(path = "/app/stop")
     public Application stop(@RequestBody StopApplicationData data) throws IOException, InterruptedException, LifecycleException {
-        var id = data.id();
-        var application = repository.findById(id);
-        var appFound = application.orElseThrow();
-        dockerManager.stopContainer(appFound);
-        configuration.removeServicePort(appFound.getPortService());
-        repository.delete(appFound);
-        return appFound;
+        var application = applicationService.findById(data.id()).orElseThrow();
+        return applicationService.stop(application);
     }
 
     @PreDestroy
     public void onShutdown() throws IOException, InterruptedException {
-        for (var application : repository.findAll()) {
-            dockerManager.stopContainer(application);
-        }
+        applicationService.stopAll();
     }
 }
