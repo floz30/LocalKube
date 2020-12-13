@@ -16,13 +16,10 @@ public class LogService {
     private final LogRepository repository;
 
     private LogService(Jdbi dataBase, LogRepository repository){
+
         this.dataBase = dataBase;
         this.repository = repository;
-    }
-
-    @PostConstruct
-    private void init() {
-        repository.init();
+        this.repository.init();
     }
 
     /**
