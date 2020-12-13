@@ -21,6 +21,17 @@ public record Log(@ColumnName("id") int id,
                   @ColumnName("timestamp") Instant timestamp) {
 
     public Log {
+        if(id<0){
+            throw new IllegalArgumentException("id >= 0 : " + id);
+        }
+        if(port<0){
+            throw new IllegalArgumentException("port >= 0 : " + port);
+        }
+        if(portService<0){
+            throw new IllegalArgumentException("portService >= 0 : " + portService);
+        }
+        Objects.requireNonNull(app);
+        Objects.requireNonNull(dockerInstance);
         Objects.requireNonNull(message);
         Objects.requireNonNull(timestamp);
     }

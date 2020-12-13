@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationServiceTest {
-
+    /*
     private ApplicationService service;
     private DockerProperties properties;
     private LocalKubeConfiguration configuration;
@@ -244,4 +244,5 @@ public class ApplicationServiceTest {
 
         assertEquals(19, service.size());
     }
+    */
 }

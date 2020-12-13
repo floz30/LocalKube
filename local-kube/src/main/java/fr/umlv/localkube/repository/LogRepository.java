@@ -23,7 +23,7 @@ public interface LogRepository {
     /**
      * Create log table in database.
      */
-    @SqlUpdate("UPDATE sqlite_sequence SET seq = 0 WHERE name='log';CREATE TABLE IF NOT EXISTS log (id INTEGER PRIMARY KEY AUTOINCREMENT, app_id INTEGER NOT NULL, message TEXT NOT NULL, timestamp TEXT NOT NULL)")
+    @SqlUpdate("CREATE TABLE IF NOT EXISTS log (id INTEGER PRIMARY KEY AUTOINCREMENT, app_id INTEGER NOT NULL, message TEXT NOT NULL, timestamp TEXT NOT NULL);UPDATE sqlite_sequence SET seq = 0 WHERE name='log';")
     boolean createTable();
 
     /**
