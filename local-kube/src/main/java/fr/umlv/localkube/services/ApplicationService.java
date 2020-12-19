@@ -43,7 +43,7 @@ public class ApplicationService {
      */
     public Application start(Application app) throws InterruptedException, ExecutionException, IOException, InvalidImageReferenceException, CacheDirectoryCreationException, RegistryException {
         Objects.requireNonNull(app);
-        dockerManager.startContainer(app);
+        dockerManager.startContainer(app, getCountInstance(app.getApp()) + 1);
         configuration.addServicePort(app.getPortService());
         apps.put(app.getId(), app);
         return app;
@@ -124,8 +124,8 @@ public class ApplicationService {
                 .findFirst();
     }
 
-    public long getCountInstance(String name) {
-        return apps.values().stream()
+    public int getCountInstance(String name) {
+        return (int) apps.values().stream()
                 .filter(app -> app.getApp().equals(name))
                 .count();
     }

@@ -128,7 +128,7 @@ public class Application {
         Objects.requireNonNull(app);
         var portApp = getPortFromName(app);
         var portService = getAvailablePortService();
-        var dockerInstance = app.split(":")[0] + "_" + portApp;
+        var dockerInstance = app.split(":")[0] + "_" + id;
         return new Application(id, app, portApp, portService, dockerInstance);
     }
 

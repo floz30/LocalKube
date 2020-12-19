@@ -11,7 +11,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 public class DockerManager {
     private final OperatingSystem os;
     private final DockerProperties properties;
+
+    private final List<Process> processes = new ArrayList<>();
 
     public DockerManager(OperatingSystem os, DockerProperties properties) throws IOException, InterruptedException {
         this.os = os;
@@ -43,14 +47,18 @@ public class DockerManager {
      * @throws CacheDirectoryCreationException if a directory to be used for the cache could not be created
      * @exception FileNotFoundException if jar file does not exist
      */
-    public void startContainer(Application application) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
+    public void startContainer(Application application, int numberTasks) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         Objects.requireNonNull(application);
         if (checksIfJarFileExists(application)) {
             if (!checksIfDockerImageExists(application)) {
                 createDockerContainer(application);
                 loadImage(application);
             }
-            runDockerImage(application);
+            if (numberTasks > 1) {
+                scaleService(application, numberTasks);
+            } else {
+                createService(application);
+            }
             return;
         }
         throw new FileNotFoundException("application jar file not found for " + application);
@@ -180,12 +188,73 @@ public class DockerManager {
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting,
      * then the wait is ended and an InterruptedException is thrown
      */
-    private void runDockerImage(Application application) throws IOException, InterruptedException {
-        var runCommand = new ProcessBuilder();
-        runCommand.command(os.getCMD(),
-                os.getOption(),
-                String.join("", Arrays.asList("docker run ", os.getHostOption(), " --entrypoint java -d -p ", application.getPortApp() + ":8080 --name ", application.getDockerInstance(), " ", application.getName(), " -Dloader.path=. --enable-preview -jar ", application.getJarName(), " --service.port=" + application.getPortService())));
-        testExitValue(runCommand.start());
+    private void createService(Application application) throws IOException, InterruptedException {
+        var runCommand = String.join("docker service create --replicas " + 1 ,
+                os.getHostOption(),
+                " --entrypoint java -d -p ",
+                application.getPortApp() + ":8080 --name ",
+                application.getApp(),
+                " ",
+                application.getName(),
+                " -Dloader.path=. --enable-preview -jar ",
+                application.getJarName(),
+                " --service.port=" + application.getPortService());
+
+        testExitValue(createProcessBuilder(runCommand).start());
+    }
+
+    private ProcessBuilder createProcessBuilder(String command) {
+        return new ProcessBuilder()
+                .command(
+                        os.getCMD(),
+                        os.getOption(),
+                        command
+                );
+    }
+
+    /**
+     *
+     */
+    public void stopAutoScale() {
+        processes.forEach(Process::destroy);
+    }
+
+    private void createService(Application application, int numberOfReplicas) throws IOException {
+        processes.add(createProcessBuilder(String.join("",
+                "docker service create --replicas " + numberOfReplicas ,
+                        os.getHostOption(),
+                        " --entrypoint java -d -p ",
+                        application.getPortApp() + ":8080 --name ",
+                        application.getApp(),
+                        " ",
+                        application.getName(),
+                        " -Dloader.path=. --enable-preview -jar ",
+                        application.getJarName(),
+                        " --service.port=" + application.getPortService())).start());
+    }
+
+    /**
+     * Scale one or multiple replicated services.
+     *
+     * @param application
+     * @param desiredNumber
+     * @throws IOException
+     */
+    private void scaleService(Application application, int desiredNumber) throws IOException {
+        var scaleCommand = new ProcessBuilder()
+                .command(os.getCMD(), os.getOption(), String.join("", Arrays.asList("docker service scale ", application.getApp(), "=" + desiredNumber)));
+        processes.add(scaleCommand.start());
+    }
+
+    /**
+     * List services.
+     *
+     * @param application
+     */
+    private int countRunningTasks(Application application) throws IOException, InterruptedException {
+        var lsCommand = new ProcessBuilder()
+                .command(os.getCMD(), os.getOption(), "docker service ls -f \"name=" +application.getApp()+ "\" --format \"{{.Replicas}}\"");
+        return Integer.parseInt(testExitValue(lsCommand.start()).split("/")[0]);
     }
 
     /**

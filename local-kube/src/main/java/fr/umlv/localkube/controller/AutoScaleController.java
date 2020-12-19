@@ -18,7 +18,7 @@ public class AutoScaleController {
     }
 
     @PostMapping("/auto-scale/update")
-    public Map<String, String> update(@RequestBody Map<String, Long> params) {
+    public Map<String, String> update(@RequestBody Map<String, Integer> params) {
         System.out.println(params);
 
         return autoScaleService.update(params);
@@ -31,7 +31,7 @@ public class AutoScaleController {
     }
 
     @GetMapping("/auto-scale/stop")
-    public Map<String, Long> stop() {
+    public Map<String, Integer> stop() {
 
         return autoScaleService.stop();
     }

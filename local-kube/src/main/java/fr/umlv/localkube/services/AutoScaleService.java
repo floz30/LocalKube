@@ -8,7 +8,7 @@ import java.util.Map;
 @Service
 public class AutoScaleService {
 
-    private Map<String, Long> instances = new HashMap<>();
+    private Map<String, Integer> instances = new HashMap<>();
     private final ApplicationService applicationService;
 
     public AutoScaleService(ApplicationService applicationService) {
@@ -19,7 +19,7 @@ public class AutoScaleService {
      *
      * @param params
      */
-    public Map<String, String> update(Map<String, Long> params) {
+    public Map<String, String> update(Map<String, Integer> params) {
         this.instances = params;
         // TODO docker operation
         return statusOutput();
@@ -37,7 +37,8 @@ public class AutoScaleService {
      *
      * @return
      */
-    public Map<String, Long> stop() {
+    public Map<String, Integer> stop() {
+
         return instances;
     }
 
