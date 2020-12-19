@@ -250,7 +250,7 @@ public class Application {
     private static int getPortFromName(String app) {
         var appSplit = app.split(":");
         if(appSplit.length!=2){
-            throw new IllegalArgumentException("Wrong format for app must be <NAME>:<PORT> having :" + app);
+            throw new IllegalArgumentException("Wrong format for app, must be <NAME>:<PORT> having :" + app);
         }
         var strPort = appSplit[1];
         return Integer.parseInt(strPort);

@@ -1,9 +1,6 @@
 package fr.umlv.localkube.component;
 
-import fr.umlv.localkube.configuration.DockerProperties;
-import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.services.ApplicationService;
-import fr.umlv.localkube.utils.OperatingSystem;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -15,7 +12,7 @@ public class DeadContainerInterceptor extends HandlerInterceptorAdapter {
 
     private final ApplicationService applicationService;
 
-    public DeadContainerInterceptor(DockerProperties properties, ApplicationService applicationService){
+    public DeadContainerInterceptor(ApplicationService applicationService){
         super();
         this.applicationService = applicationService;
     }

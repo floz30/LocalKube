@@ -11,8 +11,4 @@ public class Windows implements OperatingSystem {
         return "/c";
     }
 
-    @Override
-    public String getHostOption() {
-        return "";
-    }
 }

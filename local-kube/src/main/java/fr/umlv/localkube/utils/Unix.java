@@ -15,4 +15,9 @@ public class Unix implements OperatingSystem {
     public String getHostOption() {
         return "--add-host host.docker.internal:$(ip addr show docker0 | grep -Po 'inet \\K[\\d.]+')";
     }
+
+    @Override
+    public String getWlo1IpAddress() {
+        return "--advertise-addr $(ip -4 addr show wlo1 | grep -oP '(?<=inet\\s)\\d+(.\\d+){3}')";
+    }
 }

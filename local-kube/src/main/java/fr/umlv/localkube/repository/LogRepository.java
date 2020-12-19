@@ -42,7 +42,7 @@ public interface LogRepository {
      * Returns all instances of log.
      * @return all logs
      */
-    @SqlQuery("SELECT app_id,message,timestamp  FROM log")
+    @SqlQuery("SELECT app_id,message,timestamp FROM log ORDER BY timestamp")
     List<Log> findAll();
 
     /**
@@ -50,7 +50,7 @@ public interface LogRepository {
      * @param time timestamp
      * @return all logs
      */
-    @SqlQuery("SELECT app_id,message,timestamp  FROM log WHERE timestamp >= ?")
+    @SqlQuery("SELECT app_id,message,timestamp  FROM log WHERE timestamp >= ? ORDER BY timestamp ")
     List<Log> findAll(Instant time);
 
     /**
@@ -59,7 +59,7 @@ public interface LogRepository {
      * @param id id to search
      * @return all logs
      */
-    @SqlQuery("SELECT app_id,message,timestamp FROM log WHERE timestamp >= ? and app_id = ?")
+    @SqlQuery("SELECT app_id,message,timestamp FROM log WHERE timestamp >= ? and app_id = ? ORDER BY timestamp")
     List<Log> findAllFilterById(Instant time, int id);
 
 }
