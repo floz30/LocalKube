@@ -22,8 +22,8 @@ public class ApplicationService {
     private final DockerManager dockerManager;
     private final LocalKubeConfiguration configuration;
 
-    public ApplicationService(@Lazy LocalKubeConfiguration configuration, DockerProperties dockerProperties) throws IOException, InterruptedException {
-        this.dockerManager = new DockerManager(OperatingSystem.checkOS(),dockerProperties);
+    public ApplicationService(DockerManager dockerManager,LocalKubeConfiguration configuration) throws IOException, InterruptedException {
+        this.dockerManager = dockerManager;
         this.configuration = configuration;
     }
 
@@ -41,11 +41,18 @@ public class ApplicationService {
      * @see #dockerManager
      * @see #configuration
      */
-    public Application start(Application app) throws InterruptedException, ExecutionException, IOException, InvalidImageReferenceException, CacheDirectoryCreationException, RegistryException {
+    public Application start(Application app,int numberOfInstance) throws InterruptedException, ExecutionException, IOException, InvalidImageReferenceException, CacheDirectoryCreationException, RegistryException {
         Objects.requireNonNull(app);
-        dockerManager.startContainer(app, getCountInstance(app.getApp()) + 1);
-        configuration.addServicePort(app.getPortService());
+        if(numberOfInstance==1){
+            dockerManager.startContainer(app);
+            app.setDockerType(Application.DockerType.CONTAINER);
+        }else{
+            dockerManager.createService(app,numberOfInstance);
+            app.setDockerType(Application.DockerType.SERVICE);
+        }
         apps.put(app.getId(), app);
+        configuration.addServicePort(app.getPortService());
+
         return app;
     }
 
@@ -122,12 +129,6 @@ public class ApplicationService {
                 .filter(a -> a.getValue().getApp().equals(name))
                 .mapToInt(Map.Entry::getKey)
                 .findFirst();
-    }
-
-    public int getCountInstance(String name) {
-        return (int) apps.values().stream()
-                .filter(app -> app.getApp().equals(name))
-                .count();
     }
 
     /**

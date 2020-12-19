@@ -17,6 +17,10 @@ public class Application {
          interface OnListAndStop extends OnStart {}
     }
 
+    public enum DockerType{
+        CONTAINER,SERVICE;
+    }
+
     private static final int MIN_PORT_SERVICE = 49152;
     private static final int MAX_PORT_SERVICE = 65535;
     private final long startTime = System.currentTimeMillis();
@@ -57,6 +61,8 @@ public class Application {
     @JsonProperty("elapsed-time")
     @JsonView(View.OnListAndStop.class)
     private String elapsedTime;
+
+    private DockerType dockerType = DockerType.CONTAINER;
 
     /**
      * Application is still alive ?
@@ -195,6 +201,14 @@ public class Application {
      */
     public boolean isAlive() {
         return alive;
+    }
+
+    public DockerType getDockerType() {
+        return dockerType;
+    }
+
+    public void setDockerType(DockerType dockerType) {
+        this.dockerType = dockerType;
     }
 
     /**

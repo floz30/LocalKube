@@ -26,8 +26,6 @@ public class DockerManager {
     private final OperatingSystem os;
     private final DockerProperties properties;
 
-    private final List<Process> processes = new ArrayList<>();
-
     public DockerManager(OperatingSystem os, DockerProperties properties) throws IOException, InterruptedException {
         this.os = os;
         this.properties = properties;
@@ -47,18 +45,14 @@ public class DockerManager {
      * @throws CacheDirectoryCreationException if a directory to be used for the cache could not be created
      * @exception FileNotFoundException if jar file does not exist
      */
-    public void startContainer(Application application, int numberTasks) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
+    public void startContainer(Application application) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         Objects.requireNonNull(application);
         if (checksIfJarFileExists(application)) {
             if (!checksIfDockerImageExists(application)) {
                 createDockerContainer(application);
                 loadImage(application);
             }
-            if (numberTasks > 1) {
-                scaleService(application, numberTasks);
-            } else {
-                createService(application);
-            }
+            createContainer(application);
             return;
         }
         throw new FileNotFoundException("application jar file not found for " + application);
@@ -189,11 +183,11 @@ public class DockerManager {
      * then the wait is ended and an InterruptedException is thrown
      */
     private void createService(Application application) throws IOException, InterruptedException {
-        var runCommand = String.join("docker service create --replicas " + 1 ,
-                os.getHostOption(),
+        var runCommand = String.join("docker service create --replicas " + 1 ," ",
+                os.getHostOption("--host"),
                 " --entrypoint java -d -p ",
                 application.getPortApp() + ":8080 --name ",
-                application.getApp(),
+                application.getDockerInstance(),
                 " ",
                 application.getName(),
                 " -Dloader.path=. --enable-preview -jar ",
@@ -212,25 +206,44 @@ public class DockerManager {
                 );
     }
 
-    /**
-     *
-     */
-    public void stopAutoScale() {
-        processes.forEach(Process::destroy);
+    public void startAutoScale() throws IOException, InterruptedException {
+        createProcessBuilder("docker node update --availability active " + getNodeName() );
     }
 
-    private void createService(Application application, int numberOfReplicas) throws IOException {
-        processes.add(createProcessBuilder(String.join("",
-                "docker service create --replicas " + numberOfReplicas ,
-                        os.getHostOption(),
+    public void stopAutoScale() throws IOException, InterruptedException {
+        createProcessBuilder("docker node update --availability pause " + getNodeName() );
+    }
+
+    private String getNodeName() throws IOException, InterruptedException {
+        return testExitValue(createProcessBuilder("docker node ls --format \"{{.Hostname}}\"").start());
+    }
+
+    private void createContainer(Application application) throws IOException, InterruptedException {
+        testExitValue(createProcessBuilder(String.join("",
+                "docker run " ,
+                os.getHostOption("--add-host"),
+                " --entrypoint java -d -p ",
+                application.getPortApp() + ":8080 --name ",
+                application.getDockerInstance(),
+                " ",
+                application.getName(),
+                " -Dloader.path=. --enable-preview -jar ",
+                application.getJarName(),
+                " --service.port=" + application.getPortService())).start());
+    }
+
+    public void createService(Application application, int numberOfReplicas) throws IOException, InterruptedException {
+        createProcessBuilder(String.join("",
+                "docker service create --replicas " + numberOfReplicas ," ",
+                        os.getHostOption("--host"),
                         " --entrypoint java -d -p ",
                         application.getPortApp() + ":8080 --name ",
-                        application.getApp(),
+                        application.getDockerInstance(),
                         " ",
                         application.getName(),
                         " -Dloader.path=. --enable-preview -jar ",
                         application.getJarName(),
-                        " --service.port=" + application.getPortService())).start());
+                        " --service.port=" + application.getPortService())).start();
     }
 
     /**
@@ -240,21 +253,24 @@ public class DockerManager {
      * @param desiredNumber
      * @throws IOException
      */
-    private void scaleService(Application application, int desiredNumber) throws IOException {
-        var scaleCommand = new ProcessBuilder()
-                .command(os.getCMD(), os.getOption(), String.join("", Arrays.asList("docker service scale ", application.getApp(), "=" + desiredNumber)));
-        processes.add(scaleCommand.start());
+    public void scaleService(Application application, int desiredNumber) throws IOException {
+        createProcessBuilder(String.join("", "docker service scale -d ", application.getDockerInstance(), "=" + desiredNumber)).start();
     }
 
     /**
      * List services.
      *
-     * @param application
+     * @param name
      */
-    private int countRunningTasks(Application application) throws IOException, InterruptedException {
+    public int countRunningTasks(String name) throws IOException, InterruptedException {
+
         var lsCommand = new ProcessBuilder()
-                .command(os.getCMD(), os.getOption(), "docker service ls -f \"name=" +application.getApp()+ "\" --format \"{{.Replicas}}\"");
-        return Integer.parseInt(testExitValue(lsCommand.start()).split("/")[0]);
+                .command(os.getCMD(), os.getOption(), "docker service ls -f \"name=" +name+ "\" --format \"{{.Replicas}}\"");
+        var output = testExitValue(lsCommand.start());
+        if(output==""){
+            return 0;
+        }
+        return Integer.parseInt(output.split("/")[0]);
     }
 
     /**
@@ -265,7 +281,7 @@ public class DockerManager {
      * @throws InterruptedException if the current thread is interrupted by another thread while it is waiting,
      * then the wait is ended and an InterruptedException is thrown
      */
-    private void removeContainer(String name) throws IOException, InterruptedException {
+    public void removeContainer(String name) throws IOException, InterruptedException {
         var stopCommand = new ProcessBuilder();
         stopCommand.command(os.getCMD(), os.getOption(), " docker rm -f " + name);
         testExitValue(stopCommand.start());

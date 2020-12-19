@@ -1,6 +1,7 @@
 package fr.umlv.localkube.component;
 
 import fr.umlv.localkube.services.ApplicationService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -12,7 +13,7 @@ public class DeadContainerInterceptor extends HandlerInterceptorAdapter {
 
     private final ApplicationService applicationService;
 
-    public DeadContainerInterceptor(ApplicationService applicationService){
+    public DeadContainerInterceptor(@Lazy ApplicationService applicationService){
         super();
         this.applicationService = applicationService;
     }

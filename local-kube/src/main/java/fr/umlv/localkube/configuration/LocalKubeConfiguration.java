@@ -1,9 +1,11 @@
 package fr.umlv.localkube.configuration;
 
 import fr.umlv.localkube.component.DeadContainerInterceptor;
+import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.LogRepository;
 import fr.umlv.localkube.services.ApplicationService;
+import fr.umlv.localkube.utils.OperatingSystem;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
@@ -15,6 +17,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatWebServer;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -73,6 +76,11 @@ public class LocalKubeConfiguration implements WebMvcConfigurer {
     @Bean
     public Jdbi createJdbi(DataBaseProperties properties, ApplicationService applicationService) {
         return Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword()).installPlugin(new SQLitePlugin()).installPlugin(new SqlObjectPlugin()).registerRowMapper(new Log.LogMapper(applicationService));
+    }
+
+    @Bean
+    public DockerManager createDockerManager(DockerProperties properties) throws IOException, InterruptedException {
+        return new DockerManager(OperatingSystem.checkOS(),properties);
     }
 
     @Bean

@@ -58,7 +58,7 @@ public class ApplicationController {
     @PostMapping(path = "/app/start")
     public Application start(@RequestBody StartApplicationData data) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var application = Application.initializeApp(data.app(), applicationService.getNextId());
-        return applicationService.start(application);
+        return applicationService.start(application,1);
     }
 
     /**

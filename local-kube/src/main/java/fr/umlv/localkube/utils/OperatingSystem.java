@@ -17,7 +17,7 @@ public interface OperatingSystem {
      *
      * @return the resulting string
      */
-    default String getHostOption() {
+    default String getHostOption(String option) {
         return "";
     }
 
