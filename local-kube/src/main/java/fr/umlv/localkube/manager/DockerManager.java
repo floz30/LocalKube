@@ -6,6 +6,7 @@ import fr.umlv.localkube.configuration.DockerProperties;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.utils.OperatingSystem;
 
+import javax.annotation.PreDestroy;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,9 +24,10 @@ public class DockerManager {
     private final OperatingSystem os;
     private final DockerProperties properties;
 
-    public DockerManager(OperatingSystem os, DockerProperties properties) {
+    public DockerManager(OperatingSystem os, DockerProperties properties) throws IOException, InterruptedException {
         this.os = os;
         this.properties = properties;
+        initializeSwarm();
     }
 
     /**
@@ -98,6 +100,25 @@ public class DockerManager {
     }
 
     /**
+     *
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private void initializeSwarm() throws IOException, InterruptedException {
+        var swarmInitCommand = new ProcessBuilder();
+        swarmInitCommand.command(os.getCMD(), os.getOption(), "docker swarm init " + os.getWlo1IpAddress());
+        testExitValue(swarmInitCommand.start());
+    }
+
+    @PreDestroy
+    public void onShutdownLeaveSwarm() throws IOException, InterruptedException {
+        var swarmLeaveCommand = new ProcessBuilder();
+        swarmLeaveCommand.command(os.getCMD(), os.getOption(), "docker swarm leave --force ");
+        testExitValue(swarmLeaveCommand.start());
+    }
+
+    /**
      * Load an image from a file in /docker-images/ directory. The image name is the application's name.
      * <p>
      * Call docker's {@code load} command on the specified application.
@@ -108,7 +129,7 @@ public class DockerManager {
      */
     private void loadImage(Application application) throws IOException, InterruptedException {
         var loadCommand = new ProcessBuilder();
-        loadCommand.command(os.getCMD(), os.getOption(), " docker load < " + application.getName());
+        loadCommand.command(os.getCMD(), os.getOption(), "docker load < " + application.getName());
         loadCommand.directory(new File(getPathToDockerImage("").toString())); // on se place dans le répertoire des images
         testExitValue(loadCommand.start());
     }
@@ -216,4 +237,6 @@ public class DockerManager {
     private Path getPathToDockerImage(String imageName) {
         return Paths.get(properties.getImages(), imageName);
     }
+
+
 }

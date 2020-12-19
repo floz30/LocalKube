@@ -22,7 +22,7 @@ public class ApplicationService {
     private final DockerManager dockerManager;
     private final LocalKubeConfiguration configuration;
 
-    public ApplicationService(@Lazy LocalKubeConfiguration configuration, DockerProperties dockerProperties){
+    public ApplicationService(@Lazy LocalKubeConfiguration configuration, DockerProperties dockerProperties) throws IOException, InterruptedException {
         this.dockerManager = new DockerManager(OperatingSystem.checkOS(),dockerProperties);
         this.configuration = configuration;
     }
@@ -122,6 +122,12 @@ public class ApplicationService {
                 .filter(a -> a.getValue().getApp().equals(name))
                 .mapToInt(Map.Entry::getKey)
                 .findFirst();
+    }
+
+    public long getCountInstance(String name) {
+        return apps.values().stream()
+                .filter(app -> app.getApp().equals(name))
+                .count();
     }
 
     /**
