@@ -1,6 +1,7 @@
 package fr.umlv.localkube.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.umlv.localkube.services.ApplicationService;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
@@ -12,13 +13,13 @@ import java.time.Instant;
 import java.util.Objects;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // see here https://github.com/FasterXML/jackson-future-ideas/issues/46
-public record Log(@ColumnName("id") int id,
-                  @ColumnName("app") String app,
-                  @ColumnName("port") int port,
-                  @ColumnName("service-port") int portService,
-                  @ColumnName("docker-instance") String dockerInstance,
-                  @ColumnName("message") String message,
-                  @ColumnName("timestamp") Instant timestamp) {
+public record Log(@JsonProperty("id") @ColumnName("id") int id,
+                  @JsonProperty("app") @ColumnName("app") String app,
+                  @JsonProperty("port") @ColumnName("port") int port,
+                  @JsonProperty("service-port") @ColumnName("service-port") int portService,
+                  @JsonProperty("docker-instance") @ColumnName("docker-instance") String dockerInstance,
+                  @JsonProperty("message") @ColumnName("message") String message,
+                  @JsonProperty("timestamp") @ColumnName("timestamp") Instant timestamp) {
 
     public Log {
         if(id<0){

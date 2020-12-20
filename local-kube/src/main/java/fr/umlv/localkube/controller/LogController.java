@@ -33,7 +33,7 @@ public class LogController {
         if (request.getLocalPort() == 8080) {
             throw new IOException("You can't add log on public port 8080, try with service port.");
         }
-        var appId = applicationService.findAppIdByPortService(request.getLocalPort());
+        var appId = applicationService.findIdByPortService(request.getLocalPort());
         logService.save(appId, message, Instant.now());
         return "New log add successfully for application : " + appId;
     }

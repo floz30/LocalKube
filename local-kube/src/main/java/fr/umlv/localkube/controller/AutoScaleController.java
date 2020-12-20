@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -18,21 +19,17 @@ public class AutoScaleController {
     }
 
     @PostMapping("/auto-scale/update")
-    public Map<String, String> update(@RequestBody Map<String, Integer> params) {
-        System.out.println(params);
-
+    public Map<String, String> update(@RequestBody Map<String, Integer> params) throws IOException, InterruptedException {
         return autoScaleService.update(params);
     }
 
     @GetMapping("/auto-scale/status")
     public Map<String, String> status() {
-
         return autoScaleService.status();
     }
 
     @GetMapping("/auto-scale/stop")
-    public Map<String, Integer> stop() {
-
+    public Map<String, Integer> stop() throws IOException, InterruptedException {
         return autoScaleService.stop();
     }
 }
