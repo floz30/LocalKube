@@ -40,12 +40,55 @@ public class LocalKubeConfiguration implements WebMvcConfigurer {
     }
 
     /**
+     * Adds the deadContainerInterceptor to the InterceptorRegistry.
+     *
+     * @param registry Interceptor registry.
+     */
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(deadContainerInterceptor);
+    }
+
+    /**
      * Adds Service Port for inter application communication.
      *
      * @param servicePort New port to listen on.
      */
     public void addServicePort(int servicePort) {
         tomcat.setConnector(connectorFromPort(servicePort));
+    }
+
+    /**
+     * Creates the Jdbi instance with correct properties.
+     * @param properties Database properties.
+     * @param applicationService application Service.
+     * @return Jdbi instance.
+     */
+    @Bean
+    public Jdbi createJdbi(DataBaseProperties properties, ApplicationService applicationService) {
+        return Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword()).installPlugin(new SQLitePlugin()).installPlugin(new SqlObjectPlugin()).registerRowMapper(new Log.LogMapper(applicationService));
+    }
+
+    /**
+     * Creates the docker manager with correct properties.
+     * @param properties Docker properties.
+     * @return DockerManager object.
+     * @throws IOException If docker swarm initialization fails.
+     * @throws InterruptedException If docker swarm initialization fails.
+     */
+    @Bean
+    public DockerManager createDockerManager(DockerProperties properties) throws IOException, InterruptedException {
+        return new DockerManager(OperatingSystem.checkOS(), properties);
+    }
+
+    /**
+     * Creates the log repository instance.
+     * @param jdbi Jdbi instance.
+     * @return New log repository.
+     */
+    @Bean
+    public LogRepository logRepository(Jdbi jdbi) {
+        return jdbi.onDemand(LogRepository.class);
     }
 
     /**
@@ -81,48 +124,5 @@ public class LocalKubeConfiguration implements WebMvcConfigurer {
         connector.setSecure(true);
         connector.setDomain("localhost");
         return connector;
-    }
-
-    /**
-     * Adds the deadContainerInterceptor to the InterceptorRegistry.
-     *
-     * @param registry Interceptor registry.
-     */
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(deadContainerInterceptor);
-    }
-
-    /**
-     * Creates the Jdbi instance with correct properties.
-     * @param properties Database properties.
-     * @param applicationService application Service.
-     * @return Jdbi instance.
-     */
-    @Bean
-    public Jdbi createJdbi(DataBaseProperties properties, ApplicationService applicationService) {
-        return Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword()).installPlugin(new SQLitePlugin()).installPlugin(new SqlObjectPlugin()).registerRowMapper(new Log.LogMapper(applicationService));
-    }
-
-    /**
-     * Creates the docker manager with correct properties.
-     * @param properties Docker properties.
-     * @return DockerManager object.
-     * @throws IOException If docker swarm initialization fails.
-     * @throws InterruptedException If docker swarm initialization fails.
-     */
-    @Bean
-    public DockerManager createDockerManager(DockerProperties properties) throws IOException, InterruptedException {
-        return new DockerManager(OperatingSystem.checkOS(), properties);
-    }
-
-    /**
-     * Creates the log repository instance.
-     * @param jdbi Jdbi instance.
-     * @return New log repository.
-     */
-    @Bean
-    public LogRepository logRepository(Jdbi jdbi) {
-        return jdbi.onDemand(LogRepository.class);
     }
 }

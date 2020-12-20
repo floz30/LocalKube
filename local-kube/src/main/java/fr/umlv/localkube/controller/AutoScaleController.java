@@ -20,16 +20,34 @@ public class AutoScaleController {
         this.autoScaleService = autoScaleService;
     }
 
+    /**
+     * Start or update the auto-scale service.
+     *
+     * @param params scale configuration.
+     * @return actions left to do.
+     * @throws IOException If docker command fails.
+     * @throws InterruptedException If docker command fails.
+     */
     @PostMapping("/auto-scale/update")
     public Map<String, String> update(@RequestBody Map<String, Integer> params) throws IOException, InterruptedException {
         return autoScaleService.update(params);
     }
 
+    /**
+     * Returns actions left to do to respect the scale configuration.
+     * @return actions left to do.
+     */
     @GetMapping("/auto-scale/status")
     public Map<String, String> status() {
         return autoScaleService.status();
     }
 
+    /**
+     * Stops the auto-scale service.
+     * @return the stopped configuration.
+     * @throws IOException If docker command fails.
+     * @throws InterruptedException If docker command fails.
+     */
     @GetMapping("/auto-scale/stop")
     public Map<String, Integer> stop() throws IOException, InterruptedException {
         return autoScaleService.stop();

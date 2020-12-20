@@ -7,6 +7,7 @@ import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.repository.ApplicationRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -19,11 +20,13 @@ public class ApplicationService {
     private final DockerManager dockerManager;
     private final LocalKubeConfiguration configuration;
     private final ApplicationRepository applicationRepository;
+    private final AutoScaleService autoScaleService;
 
-    public ApplicationService(DockerManager dockerManager,LocalKubeConfiguration configuration, ApplicationRepository applicationRepository) {
+    public ApplicationService(DockerManager dockerManager,LocalKubeConfiguration configuration, ApplicationRepository applicationRepository,@Lazy AutoScaleService autoScaleService) {
         this.dockerManager = dockerManager;
         this.configuration = configuration;
         this.applicationRepository = applicationRepository;
+        this.autoScaleService = autoScaleService;
     }
 
     /**
@@ -44,10 +47,10 @@ public class ApplicationService {
         Objects.requireNonNull(app);
         if (numberOfInstance == 1){
             dockerManager.startContainer(app);
-            app.setDockerType(Application.DockerType.CONTAINER);
+            app.setDockerType(new Application.DockerContainer());
         } else {
             dockerManager.createService(app,numberOfInstance);
-            app.setDockerType(Application.DockerType.SERVICE);
+            app.setDockerType(new Application.DockerService());
         }
         applicationRepository.save(app);
         configuration.addServicePort(app.getPortService());
@@ -67,9 +70,9 @@ public class ApplicationService {
      */
     public Application stop(Application app) throws IOException, InterruptedException {
         Objects.requireNonNull(app);
-        dockerManager.stopContainer(app);
+        app.removeApplication(dockerManager);
+        autoScaleService.remove(app.getApp());
         configuration.removeServicePort(app.getPortService());
-        app.kill();
         return app;
     }
 

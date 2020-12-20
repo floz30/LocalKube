@@ -2,6 +2,7 @@ package fr.umlv.localkube.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import fr.umlv.localkube.manager.DockerManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,9 +17,38 @@ public class Application {
          interface OnListAndStop extends OnStart {}
     }
 
-    public enum DockerType{
-        CONTAINER,SERVICE
-        //TODO polymorphisme
+    public interface DockerType{
+        void removeApplication(Application application,DockerManager dockerManager) throws IOException, InterruptedException;
+        DockerType scaleApplication(Application application, int numberOfInstance, DockerManager dockerManager) throws IOException, InterruptedException;
+    }
+
+    public static class DockerContainer implements DockerType {
+
+        @Override
+        public void removeApplication(Application application, DockerManager dockerManager) throws IOException, InterruptedException {
+            dockerManager.removeContainer(application.getDockerInstance());
+        }
+
+        @Override
+        public DockerType scaleApplication(Application application, int numberOfInstance,DockerManager dockerManager) throws IOException, InterruptedException {
+            dockerManager.removeContainer(application.getDockerInstance());
+            dockerManager.createService(application, numberOfInstance);
+            return new DockerService();
+        }
+    }
+
+    public static class DockerService implements DockerType{
+
+        @Override
+        public void removeApplication(Application application, DockerManager dockerManager) throws IOException, InterruptedException {
+            dockerManager.removeService(application.getDockerInstance());
+        }
+
+        @Override
+        public DockerType scaleApplication(Application application, int numberOfInstance, DockerManager dockerManager) throws IOException, InterruptedException {
+            dockerManager.scaleService(application, numberOfInstance);
+            return this;
+        }
     }
 
     private static final int MIN_PORT_SERVICE = 49152;
@@ -62,7 +92,7 @@ public class Application {
     @JsonView(View.OnListAndStop.class)
     private String elapsedTime;
 
-    private DockerType dockerType = DockerType.CONTAINER;
+    private DockerType dockerType = new DockerContainer();
 
     /**
      * Application is still alive ?
@@ -139,24 +169,12 @@ public class Application {
     }
 
     /**
-     * Kill this application.
-     * @see #alive
-     */
-    public void kill(){
-        this.alive = false;
-    }
-
-    /**
      * Returns {@code true} if this application is still alive, otherwise returns {@code false}.
      *
      * @return true if the application is alive, false otherwise.
      */
     public boolean isAlive() {
         return alive;
-    }
-
-    public DockerType getDockerType() {
-        return dockerType;
     }
 
     public void setDockerType(DockerType dockerType) {
@@ -198,6 +216,15 @@ public class Application {
     public String getElapsedTime() {
         elapsedTime = formatElapsedTime(System.currentTimeMillis());
         return elapsedTime;
+    }
+
+    public void removeApplication(DockerManager dockerManager) throws IOException, InterruptedException {
+        dockerType.removeApplication(this,dockerManager);
+        alive = false;
+    }
+
+    public void scaleApplication(int numberOfInstance,DockerManager dockerManager) throws IOException, InterruptedException {
+        dockerType.scaleApplication(this,numberOfInstance,dockerManager);
     }
 
     private static int getAvailablePortService() {
