@@ -69,7 +69,7 @@ public class ApplicationController {
     @JsonView(Application.View.OnListAndStop.class)
     @GetMapping("/app/list")
     public List<Application> list() {
-        return applicationService.list();
+        return applicationService.listLaunchedApplications();
     }
 
     /**
