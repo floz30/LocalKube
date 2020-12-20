@@ -15,6 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+//TODO attention au nombre de ligne
 public class AutoScaleService {
 
     private Map<String, Integer> instances = new HashMap<>();
@@ -51,17 +52,18 @@ public class AutoScaleService {
     }
 
     private void scaleAll() {
-        instances.entrySet().forEach(e -> {
-            var id = applicationService.findIdByName(e.getKey());
+        // TODO à revoir
+        instances.forEach((key, value) -> {
+            var id = applicationService.findIdByName(key);
             if (id.isPresent()) {
                 try {
-                    scaleExistingApplication(applicationService.findById(id.getAsInt()).get(), e.getValue());
+                    scaleExistingApplication(applicationService.findById(id.getAsInt()).get(), value);
                 } catch (IOException | InterruptedException exception) {
                     throw new RuntimeException(exception);
                 }
             } else {
                 try {
-                    scaleNewApplication(e.getKey(), e.getValue());
+                    scaleNewApplication(key, value);
                 } catch (InterruptedException | ExecutionException | IOException | InvalidImageReferenceException | CacheDirectoryCreationException | RegistryException exception) {
                     throw new RuntimeException(exception);
                 }
@@ -85,13 +87,9 @@ public class AutoScaleService {
 
     private void scaleExistingApplication(Application application, int numberOfInstance) throws IOException, InterruptedException {
         switch (application.getDockerType()) {
-            case CONTAINER -> {
-                scaleExistingContainer(application, numberOfInstance);
-            }
-            case SERVICE -> {
-                scaleExistingService(application, numberOfInstance);
-            }
-            default -> throw new IllegalStateException("Unkown docker type");
+            case CONTAINER -> scaleExistingContainer(application, numberOfInstance);
+            case SERVICE -> scaleExistingService(application, numberOfInstance);
+            default -> throw new IllegalStateException("Unknown docker type");
         }
     }
 
@@ -99,6 +97,7 @@ public class AutoScaleService {
      * @return
      */
     public Map<String, String> status() {
+        //TODO à revoir
         var mapInstances = createMapInstances(instances, s -> {
             try {
                 return dockerManager.countRunningTasks(applicationService.findById(applicationService.findIdByName(s).getAsInt()).get().getDockerInstance());
@@ -119,7 +118,7 @@ public class AutoScaleService {
     }
 
     private Map<String, Integer> createMapInstances(Map<String, Integer> mapInstances, Function<String, Integer> function) {
-        return mapInstances.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> function.apply(e.getKey())));
+        return mapInstances.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> function.apply(e.getKey())));
     }
 
     /**

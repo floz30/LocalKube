@@ -3,6 +3,7 @@ package fr.umlv.localkube.controller;
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.services.ApplicationService;
 import fr.umlv.localkube.services.LogService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import java.time.Instant;
 import java.util.List;
 
 @RestController
+@Validated
 public class LogController {
     private final LogService logService;
     private final ApplicationService applicationService;

@@ -24,7 +24,7 @@ public interface LogRepository {
      * Create log table in database.
      */
     @SqlUpdate("CREATE TABLE IF NOT EXISTS log (id INTEGER PRIMARY KEY AUTOINCREMENT, app_id INTEGER NOT NULL, message TEXT NOT NULL, timestamp DATE NOT NULL);UPDATE sqlite_sequence SET seq = 0 WHERE name='log';")
-    boolean createTable();
+    void createTable();
 
     /**
      * Delete all tuples from log table.

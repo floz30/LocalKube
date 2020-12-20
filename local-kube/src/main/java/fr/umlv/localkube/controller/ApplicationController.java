@@ -7,6 +7,7 @@ import com.google.cloud.tools.jib.api.InvalidImageReferenceException;
 import com.google.cloud.tools.jib.api.RegistryException;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.services.ApplicationService;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 @RestController
+@Validated
 public class ApplicationController {
 
     private final ApplicationService applicationService;
@@ -56,7 +58,7 @@ public class ApplicationController {
      */
     @JsonView(Application.View.OnStart.class)
     @PostMapping(path = "/app/start")
-    public Application start(@RequestBody StartApplicationData data) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
+    public Application start( @RequestBody StartApplicationData data) throws IOException, InterruptedException, ExecutionException, RegistryException, CacheDirectoryCreationException, InvalidImageReferenceException {
         var application = Application.initializeApp(data.app(), applicationService.getNextId());
         return applicationService.start(application,1);
     }

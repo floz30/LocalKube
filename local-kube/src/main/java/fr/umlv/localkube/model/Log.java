@@ -39,7 +39,7 @@ public record Log(@JsonProperty("id") @ColumnName("id") int id,
 
     public static class LogMapper implements RowMapper<Log> {
 
-        private ApplicationService applicationService;
+        private final ApplicationService applicationService;
 
         public LogMapper(ApplicationService applicationService){
             this.applicationService =applicationService;

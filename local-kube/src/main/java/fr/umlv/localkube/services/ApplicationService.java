@@ -51,7 +51,6 @@ public class ApplicationService {
         }
         applicationRepository.save(app);
         configuration.addServicePort(app.getPortService());
-
         return app;
     }
 

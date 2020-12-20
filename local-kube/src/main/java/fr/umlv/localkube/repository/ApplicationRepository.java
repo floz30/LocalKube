@@ -19,14 +19,13 @@ public class ApplicationRepository {
      * Save an application.
      *
      * @param application the application to save
-     * @return the saved application
      */
-    public Application save(Application application) {
+    public void save(Application application) {
         if (application.getId() <= 0) {
             throw new IllegalArgumentException("application id can't be negative or zero");
         }
         Objects.requireNonNull(application);
-        return applications.put(application.getId(), application);
+        applications.put(application.getId(), application);
     }
 
     /**
@@ -83,15 +82,6 @@ public class ApplicationRepository {
         getFilteredStream(entry -> entry.getValue().getDockerInstance().equals(instance))
                 .findFirst()
                 .ifPresent(application -> applications.remove(application.getKey()));
-    }
-
-    /**
-     * Returns the number of applications.
-     *
-     * @return the number of applications
-     */
-    public int size() {
-        return applications.size();
     }
 
 }

@@ -2,22 +2,17 @@ package fr.umlv.localkube.services;
 
 import fr.umlv.localkube.model.Log;
 import fr.umlv.localkube.repository.LogRepository;
-import org.jdbi.v3.core.Jdbi;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
 @Service
 public class LogService {
-    private final Jdbi dataBase;
     private final LogRepository repository;
 
-    private LogService(Jdbi dataBase, LogRepository repository){
-
-        this.dataBase = dataBase;
+    private LogService(LogRepository repository){
         this.repository = repository;
         this.repository.init();
     }
