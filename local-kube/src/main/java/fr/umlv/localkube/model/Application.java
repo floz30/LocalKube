@@ -17,6 +17,10 @@ public class Application {
          interface OnListAndStop extends OnStart {}
     }
 
+    public enum DockerType{
+        CONTAINER,SERVICE;
+    }
+
     private static final int MIN_PORT_SERVICE = 49152;
     private static final int MAX_PORT_SERVICE = 65535;
     private final long startTime = System.currentTimeMillis();
@@ -57,6 +61,8 @@ public class Application {
     @JsonProperty("elapsed-time")
     @JsonView(View.OnListAndStop.class)
     private String elapsedTime;
+
+    private DockerType dockerType = DockerType.CONTAINER;
 
     /**
      * Application is still alive ?
@@ -128,7 +134,7 @@ public class Application {
         Objects.requireNonNull(app);
         var portApp = getPortFromName(app);
         var portService = getAvailablePortService();
-        var dockerInstance = app.split(":")[0] + "_" + portApp;
+        var dockerInstance = app.split(":")[0] + "_" + id;
         return new Application(id, app, portApp, portService, dockerInstance);
     }
 
@@ -197,6 +203,14 @@ public class Application {
         return alive;
     }
 
+    public DockerType getDockerType() {
+        return dockerType;
+    }
+
+    public void setDockerType(DockerType dockerType) {
+        this.dockerType = dockerType;
+    }
+
     /**
      * Returns service port of this application.
      *
@@ -250,7 +264,7 @@ public class Application {
     private static int getPortFromName(String app) {
         var appSplit = app.split(":");
         if(appSplit.length!=2){
-            throw new IllegalArgumentException("Wrong format for app must be <NAME>:<PORT> having :" + app);
+            throw new IllegalArgumentException("Wrong format for app, must be <NAME>:<PORT> having :" + app);
         }
         var strPort = appSplit[1];
         return Integer.parseInt(strPort);

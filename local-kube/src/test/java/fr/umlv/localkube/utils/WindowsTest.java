@@ -16,9 +16,10 @@ public class WindowsTest {
         assertEquals("/c", os.getOption());
     }
 
+    /*
     @Test
     void getHostOption_Success() {
         assertEquals("", os.getHostOption());
-    }
+    }*/
 
 }
