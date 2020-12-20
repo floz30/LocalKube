@@ -30,61 +30,76 @@ public class AutoScaleService {
      * @param params
      */
     public Map<String, String> update(Map<String, Integer> params) throws IOException, InterruptedException {
-        var mapInstances = createMapInstances(params,s -> {
-            var value =  instances.getOrDefault(s,0);
-            if(value==0){
+        var mapInstances = getNumberOfExistingInstanceByName(params);
+        this.instances = params;
+        var output = statusOutput(mapInstances);
+        dockerManager.startAutoScale();
+        scaleAll();
+        return output;
+    }
+
+    private Map<String, Integer> getNumberOfExistingInstanceByName(Map<String, Integer> params) {
+        return createMapInstances(params, s -> {
+            var value = instances.getOrDefault(s, 0);
+            if (value == 0) {
                 if (applicationService.findIdByName(s).isPresent()) {
                     return 1;
                 }
             }
             return value;
         });
+    }
 
-
-        this.instances = params;
-        var output = statusOutput(mapInstances);
-        dockerManager.startAutoScale();
+    private void scaleAll() {
         instances.entrySet().forEach(e -> {
             var id = applicationService.findIdByName(e.getKey());
             if (id.isPresent()) {
-                var application = applicationService.findById(id.getAsInt());
-                switch (application.get().getDockerType()) {
-                    case CONTAINER -> {
-                        try {
-                            dockerManager.removeContainer(application.get().getDockerInstance());
-                            dockerManager.createService(application.get(), e.getValue());
-                        } catch (IOException ioException) {
-                            ioException.printStackTrace();
-                        } catch (InterruptedException interruptedException) {
-                            interruptedException.printStackTrace();
-                        }
-                        application.get().setDockerType(Application.DockerType.SERVICE);
-                    }
-                    case SERVICE -> {
-                        try {
-                            dockerManager.scaleService(application.get(), e.getValue());
-                        } catch (IOException ioException) {
-                            throw new RuntimeException(ioException);
-                        }
-                    }
-                    default -> throw new IllegalStateException("Unkown docker type");
+                try {
+                    scaleExistingApplication(applicationService.findById(id.getAsInt()).get(), e.getValue());
+                } catch (IOException | InterruptedException exception) {
+                    throw new RuntimeException(exception);
                 }
             } else {
                 try {
-                    applicationService.start(Application.initializeApp(e.getKey(), applicationService.getNextId()), e.getValue());
+                    scaleNewApplication(e.getKey(), e.getValue());
                 } catch (InterruptedException | ExecutionException | IOException | InvalidImageReferenceException | CacheDirectoryCreationException | RegistryException exception) {
                     throw new RuntimeException(exception);
                 }
             }
         });
-        return output;
+    }
+
+    private void scaleNewApplication(String name, int numberOfInstance) throws RegistryException, InterruptedException, ExecutionException, IOException, CacheDirectoryCreationException, InvalidImageReferenceException {
+        applicationService.start(Application.initializeApp(name, applicationService.getNextId()), numberOfInstance);
+    }
+
+    private void scaleExistingContainer(Application application, int numberOfInstance) throws IOException, InterruptedException {
+        dockerManager.removeContainer(application.getDockerInstance());
+        dockerManager.createService(application, numberOfInstance);
+        application.setDockerType(Application.DockerType.SERVICE);
+    }
+
+    private void scaleExistingService(Application application, int numberOfInstance) throws IOException {
+        dockerManager.scaleService(application, numberOfInstance);
+    }
+
+    private void scaleExistingApplication(Application application, int numberOfInstance) throws IOException, InterruptedException {
+        switch (application.getDockerType()) {
+            case CONTAINER -> {
+                scaleExistingContainer(application, numberOfInstance);
+            }
+            case SERVICE -> {
+                scaleExistingService(application, numberOfInstance);
+            }
+            default -> throw new IllegalStateException("Unkown docker type");
+        }
     }
 
     /**
      * @return
      */
     public Map<String, String> status() {
-        var mapInstances = createMapInstances(instances,s -> {
+        var mapInstances = createMapInstances(instances, s -> {
             try {
                 return dockerManager.countRunningTasks(applicationService.findById(applicationService.findIdByName(s).getAsInt()).get().getDockerInstance());
             } catch (IOException | InterruptedException exception) {
@@ -103,7 +118,7 @@ public class AutoScaleService {
         return instances;
     }
 
-    private Map<String, Integer> createMapInstances(Map<String,Integer> mapInstances,Function<String, Integer> function) {
+    private Map<String, Integer> createMapInstances(Map<String, Integer> mapInstances, Function<String, Integer> function) {
         return mapInstances.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> function.apply(e.getKey())));
     }
 
@@ -124,7 +139,6 @@ public class AutoScaleService {
                 default -> throw new IllegalStateException("issue with compareTo");
             }
         }
-        // TODO docker operation
         return result;
     }
 }
