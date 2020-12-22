@@ -3,6 +3,8 @@ package fr.umlv.localkube.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import fr.umlv.localkube.manager.DockerManager;
+import fr.umlv.localkube.utils.DockerContainer;
+import fr.umlv.localkube.utils.DockerType;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,40 +17,6 @@ public class Application {
     public interface View {
          interface OnStart {}
          interface OnListAndStop extends OnStart {}
-    }
-
-    public interface DockerType{
-        void removeApplication(Application application,DockerManager dockerManager) throws IOException, InterruptedException;
-        DockerType scaleApplication(Application application, int numberOfInstance, DockerManager dockerManager) throws IOException, InterruptedException;
-    }
-
-    public static class DockerContainer implements DockerType {
-
-        @Override
-        public void removeApplication(Application application, DockerManager dockerManager) throws IOException, InterruptedException {
-            dockerManager.removeContainer(application.getDockerInstance());
-        }
-
-        @Override
-        public DockerType scaleApplication(Application application, int numberOfInstance,DockerManager dockerManager) throws IOException, InterruptedException {
-            dockerManager.removeContainer(application.getDockerInstance());
-            dockerManager.createService(application, numberOfInstance);
-            return new DockerService();
-        }
-    }
-
-    public static class DockerService implements DockerType{
-
-        @Override
-        public void removeApplication(Application application, DockerManager dockerManager) throws IOException, InterruptedException {
-            dockerManager.removeService(application.getDockerInstance());
-        }
-
-        @Override
-        public DockerType scaleApplication(Application application, int numberOfInstance, DockerManager dockerManager) throws IOException, InterruptedException {
-            dockerManager.scaleService(application, numberOfInstance);
-            return this;
-        }
     }
 
     private static final int MIN_PORT_SERVICE = 49152;

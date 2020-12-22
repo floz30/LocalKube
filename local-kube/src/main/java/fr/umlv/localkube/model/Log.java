@@ -22,13 +22,13 @@ public record Log(@JsonProperty("id") @ColumnName("id") int id,
                   @JsonProperty("timestamp") @ColumnName("timestamp") Instant timestamp) {
 
     public Log {
-        if(id<0){
+        if (id < 0) {
             throw new IllegalArgumentException("id >= 0 : " + id);
         }
-        if(port<0){
+        if (port < 0) {
             throw new IllegalArgumentException("port >= 0 : " + port);
         }
-        if(portService<0){
+        if (portService < 0) {
             throw new IllegalArgumentException("portService >= 0 : " + portService);
         }
         Objects.requireNonNull(app);

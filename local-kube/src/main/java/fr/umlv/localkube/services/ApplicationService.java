@@ -7,6 +7,8 @@ import fr.umlv.localkube.configuration.LocalKubeConfiguration;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Application;
 import fr.umlv.localkube.repository.ApplicationRepository;
+import fr.umlv.localkube.utils.DockerContainer;
+import fr.umlv.localkube.utils.DockerService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -47,10 +49,10 @@ public class ApplicationService {
         Objects.requireNonNull(app);
         if (numberOfInstance == 1){
             dockerManager.startContainer(app);
-            app.setDockerType(new Application.DockerContainer());
+            app.setDockerType(new DockerContainer());
         } else {
             dockerManager.createService(app,numberOfInstance);
-            app.setDockerType(new Application.DockerService());
+            app.setDockerType(new DockerService());
         }
         applicationRepository.save(app);
         configuration.addServicePort(app.getPortService());

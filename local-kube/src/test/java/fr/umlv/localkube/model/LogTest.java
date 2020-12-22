@@ -10,8 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LogTest {
 
-    @Test
-    @Tag("Log")
+    @Test @Tag("constructor") @Tag("exception")
     void shouldFailOnNull() {
         assertAll(
                 () -> assertThrows(NullPointerException.class, () -> new Log(1, null, 0, 0, "test", "test", Instant.now())),
@@ -21,23 +20,19 @@ public class LogTest {
         );
     }
 
-    @Test
-    @Tag("Log")
+    @Test @Tag("constructor") @Tag("exception")
     void shouldFailOnNegativeId() {
         assertThrows(IllegalArgumentException.class, () -> new Log(-1, "test", 0, 0, "test", "test", Instant.now()));
     }
 
-    @Test
-    @Tag("Log")
+    @Test @Tag("constructor") @Tag("exception")
     void shouldFailOnNegativePort() {
         assertThrows(IllegalArgumentException.class, () -> new Log(1, "test", -1, 0, "test", "test", Instant.now()));
     }
 
-    @Test
-    @Tag("Log")
+    @Test @Tag("constructor") @Tag("exception")
     void shouldFailOnNegativePortService() {
         assertThrows(IllegalArgumentException.class, () -> new Log(1, "test", 0, -1, "test", "test", Instant.now()));
     }
-
 
 }
