@@ -2,6 +2,7 @@ package fr.umlv.localkube.component;
 
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -31,7 +32,7 @@ public class DeadContainerInterceptor extends HandlerInterceptorAdapter {
      * @throws Exception in case of errors
      */
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle( HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         applicationService.removeAllDeadDockerInstance();
         return super.preHandle(request, response, handler);
     }

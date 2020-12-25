@@ -3,8 +3,8 @@ package fr.umlv.localkube.configuration;
 import fr.umlv.localkube.component.DeadContainerInterceptor;
 import fr.umlv.localkube.manager.DockerManager;
 import fr.umlv.localkube.model.Log;
+import fr.umlv.localkube.repository.ApplicationRepository;
 import fr.umlv.localkube.repository.LogRepository;
-import fr.umlv.localkube.services.ApplicationService;
 import fr.umlv.localkube.utils.OperatingSystem;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Service;
@@ -61,12 +61,12 @@ public class LocalKubeConfiguration implements WebMvcConfigurer {
     /**
      * Creates the Jdbi instance with correct properties.
      * @param properties Database properties.
-     * @param applicationService application Service.
+     * @param applicationRepository application repository.
      * @return Jdbi instance.
      */
     @Bean
-    public Jdbi createJdbi(DataBaseProperties properties, ApplicationService applicationService) {
-        return Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword()).installPlugin(new SQLitePlugin()).installPlugin(new SqlObjectPlugin()).registerRowMapper(new Log.LogMapper(applicationService));
+    public Jdbi createJdbi(DataBaseProperties properties, ApplicationRepository applicationRepository) {
+        return Jdbi.create(properties.getUrl(), properties.getUsername(), properties.getPassword()).installPlugin(new SQLitePlugin()).installPlugin(new SqlObjectPlugin()).registerRowMapper(new Log.LogMapper(applicationRepository));
     }
 
     /**

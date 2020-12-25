@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.util.Map;
 
+/**
+ * Controller for the auto-scale management.
+ */
 @RestController
 @Validated
 public class AutoScaleController {

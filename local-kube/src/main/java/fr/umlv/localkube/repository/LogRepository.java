@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Repository interface for the logs.
+ */
 @Repository
 public interface LogRepository {
 

@@ -14,6 +14,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for the auto-scale.
+ */
 @Service
 public class AutoScaleService {
 
@@ -127,11 +130,9 @@ public class AutoScaleService {
     }
 
     private void scaleAll() {
-        instances.forEach((key, value) -> {
-            applicationService.findIdByName(key).ifPresentOrElse(
-                    id -> scaleExistingApplication(applicationService.findById(id).get(), value),
-                    () -> scaleNewApplication(key, value));
-        });
+        instances.forEach((key, value) -> applicationService.findIdByName(key).ifPresentOrElse(
+                id -> scaleExistingApplication(applicationService.findById(id).get(), value),
+                () -> scaleNewApplication(key, value)));
     }
 
     private void scaleExistingApplication(Application application, int numberOfInstance) {

@@ -97,7 +97,7 @@ public class DockerManager {
     }
 
     /**
-     * Stop and delete all replicas when localkube is shutdown.
+     * Stop and delete all replicas when LocalKube is shutdown.
      *
      * @throws IOException          if an I/O error occurs
      * @throws InterruptedException if the execution was interrupted
@@ -106,7 +106,7 @@ public class DockerManager {
     public void onShutdownLeaveSwarm() throws IOException, InterruptedException {
         var swarmLeaveCommand = new ProcessBuilder();
         swarmLeaveCommand.command(os.getCMD(), os.getOption(), "docker swarm leave --force");
-        testExitValue(swarmLeaveCommand.start()); // à voir si on a besoin de testExitValue
+        testExitValue(swarmLeaveCommand.start());
     }
 
     /**
@@ -230,10 +230,6 @@ public class DockerManager {
         application.removeApplication(this);
     }
 
-
-    /* Méthodes privées */
-
-
     private boolean checksIfDockerImageExists(Application application) {
         return Files.exists(getPathToDockerImage(application.getName()));
     }
@@ -302,7 +298,7 @@ public class DockerManager {
     private void loadImage(Application application) throws IOException, InterruptedException {
         var loadCommand = new ProcessBuilder()
                 .command(os.getCMD(), os.getOption(), "docker load < " + application.getName())
-                .directory(new File(getPathToDockerImage("").toString())); // on se place dans le répertoire des images
+                .directory(new File(getPathToDockerImage("").toString()));
         testExitValue(loadCommand.start());
     }
 

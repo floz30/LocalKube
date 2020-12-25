@@ -19,6 +19,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Controller for the applications management.
+ */
 @RestController
 @Validated
 public class ApplicationController {

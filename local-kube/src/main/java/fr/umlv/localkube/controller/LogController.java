@@ -12,6 +12,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Controller for the logs management.
+ */
 @RestController
 @Validated
 public class LogController {
@@ -25,9 +28,9 @@ public class LogController {
 
     /**
      * Create - Add a new {@code Log}
-     * @param request
+     * @param request the http servlet request
      * @param message the log message
-     * @return
+     * @return validation message
      * @throws IOException if you call this method on the wrong port
      */
     @PostMapping("/log")

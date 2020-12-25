@@ -2,7 +2,7 @@ package fr.umlv.localkube.model;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import fr.umlv.localkube.services.ApplicationService;
+import fr.umlv.localkube.repository.ApplicationRepository;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.mapper.reflect.ColumnName;
 import org.jdbi.v3.core.statement.StatementContext;
@@ -12,6 +12,9 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Objects;
 
+/**
+ * Class which represents a Log sent from an application.
+ */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY) // see here https://github.com/FasterXML/jackson-future-ideas/issues/46
 public record Log(@JsonProperty("id") @ColumnName("id") int id,
                   @JsonProperty("app") @ColumnName("app") String app,
@@ -39,15 +42,22 @@ public record Log(@JsonProperty("id") @ColumnName("id") int id,
 
     public static class LogMapper implements RowMapper<Log> {
 
-        private final ApplicationService applicationService;
+        private final ApplicationRepository applicationRepository;
 
-        public LogMapper(ApplicationService applicationService){
-            this.applicationService =applicationService;
+        public LogMapper(ApplicationRepository applicationRepository){
+            this.applicationRepository =applicationRepository;
         }
 
+        /**
+         * Maps a log retrieve from dataBase to a Log based on his application
+         * @param rs the result set being iterated
+         * @param ctx the statement context
+         * @return the new log
+         * @throws SQLException if jdbc mapping fails
+         */
         @Override
         public Log map(ResultSet rs, StatementContext ctx) throws SQLException {
-            var application = applicationService.findById(rs.getInt(1)).orElseThrow();
+            var application = applicationRepository.findById(rs.getInt(1)).orElseThrow();
             return new Log(rs.getInt(1),application.getApp(),application.getPortApp(),application.getPortService(),application.getDockerInstance(),rs.getString(2),rs.getTimestamp(3).toInstant());
         }
     }

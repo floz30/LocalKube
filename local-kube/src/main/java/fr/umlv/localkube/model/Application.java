@@ -12,6 +12,9 @@ import java.util.Calendar;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
+/**
+ * Class which represents a docker application.
+ */
 public class Application {
 
     public interface View {
@@ -145,6 +148,10 @@ public class Application {
         return alive;
     }
 
+    /**
+     * Sets the the docker type to a new one
+     * @param dockerType type of docker application
+     */
     public void setDockerType(DockerType dockerType) {
         this.dockerType = dockerType;
     }
@@ -186,11 +193,24 @@ public class Application {
         return elapsedTime;
     }
 
+    /**
+     * Removes the application from docker
+     * @param dockerManager docker manager
+     * @throws IOException if docker command fails
+     * @throws InterruptedException if docker command fails
+     */
     public void removeApplication(DockerManager dockerManager) throws IOException, InterruptedException {
         dockerType.removeApplication(this,dockerManager);
         alive = false;
     }
 
+    /**
+     * Scales the application in docker
+     * @param numberOfInstance number of instance to run on scale
+     * @param dockerManager docker manager
+     * @throws IOException if docker command fails
+     * @throws InterruptedException if docker command fails
+     */
     public void scaleApplication(int numberOfInstance,DockerManager dockerManager) throws IOException, InterruptedException {
         dockerType.scaleApplication(this,numberOfInstance,dockerManager);
     }

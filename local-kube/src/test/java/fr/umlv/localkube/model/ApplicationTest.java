@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ApplicationTest {
-/*
+
     @Test @Tag("initializeApp")
     void shouldThrowNullPointerExceptionInInitialize() {
         assertThrows(NullPointerException.class, () -> Application.initializeApp(null, 1));
@@ -34,22 +34,14 @@ public class ApplicationTest {
 
     @Test @Tag("getJarName")
     void shouldReturnCorrectJarFilename() {
-        var app = new Application.ApplicationBuilder()
-                .setApp("demo:8081")
-                .setId(1)
-                .build();
-
+        var app = Application.initializeApp("demo:8081",1);
         var actual = app.getJarName();
-
         assertEquals("demo.jar", actual);
     }
 
     @Test @Tag("getName")
     void shouldReturnCorrectName() {
-        var app = new Application.ApplicationBuilder()
-                .setApp("demo:8081")
-                .setId(1)
-                .build();
+        var app = Application.initializeApp("demo:8081",1);
 
         var actual = app.getName();
 
@@ -68,20 +60,9 @@ public class ApplicationTest {
         assertEquals("demo:8081",app.getApp());
     }
 
-    @Test @Tag("kill")
-    void shouldKillApp(){
-        var app = Application.initializeApp("demo:8081",1);
-        app.kill();
-        assertFalse(app.isAlive());
-    }
-
     @Test @Tag("getPortService")
     void shouldReturnCorrectPortService(){
-        var app = new Application.ApplicationBuilder()
-                .setApp("demo:8081")
-                .setId(1)
-                .setportService(49152)
-                .build();
+        var app = Application.initializeApp("demo:8081",1);
         assertEquals(49152,app.getPortService());
     }
 
@@ -96,5 +77,5 @@ public class ApplicationTest {
         var app = Application.initializeApp("demo:8081",1);
         assertEquals("0m0s",app.getElapsedTime());
     }
-*/
+
 }

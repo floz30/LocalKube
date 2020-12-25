@@ -7,6 +7,9 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * Repository class for the applications.
+ */
 @Repository
 public class ApplicationRepository {
     private final Map<Integer, Application> applications;
@@ -21,9 +24,6 @@ public class ApplicationRepository {
      * @param application the application to save
      */
     public void save(Application application) {
-        if (application.getId() <= 0) {
-            throw new IllegalArgumentException("application id can't be negative or zero");
-        }
         Objects.requireNonNull(application);
         applications.put(application.getId(), application);
     }
@@ -66,7 +66,7 @@ public class ApplicationRepository {
 
     /**
      * Returns the next usable identifier.
-     * @return max id + 1
+     * @return max id
      */
     public int getMaxId() {
         return applications.keySet().stream()
@@ -77,6 +77,7 @@ public class ApplicationRepository {
 
     /**
      * Removes all applications that have their dockerInstance in array.
+     * @param instance docker instance name
      */
     public void removeAllDeadDockerInstance(String instance) {
         getFilteredStream(entry -> entry.getValue().getDockerInstance().equals(instance))

@@ -17,6 +17,9 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * Service class for applications.
+ */
 @Service
 public class ApplicationService {
     private final DockerManager dockerManager;

@@ -5,6 +5,9 @@ import fr.umlv.localkube.model.Application;
 
 import java.io.IOException;
 
+/**
+ * Represents a docker container.
+ */
 public class DockerContainer implements DockerType {
 
     @Override

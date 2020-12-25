@@ -8,6 +8,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Service class for the logs.
+ */
 @Service
 public class LogService {
     private final LogRepository repository;
@@ -40,7 +43,7 @@ public class LogService {
     /**
      * Returns all logs who was issued since last {@code time} minutes.
      *
-     * @param minutes
+     * @param minutes duration in minutes
      * @return a list of {@code Log}
      */
     public List<Log> selectAllFromDuration(Duration minutes) {
@@ -50,7 +53,7 @@ public class LogService {
     /**
      * Returns all logs who was issued since last {@code time} minutes for the application with its ID equals to {@code id}.
      *
-     * @param minutes
+     * @param minutes duration in minutes
      * @param id ID of the application
      * @return a list of {@code Log}
      */
