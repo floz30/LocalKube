@@ -65,6 +65,8 @@ public class AutoScaleService {
      * Stops the scaling service.
      *
      * @return instances that were managed by the auto-scale service.
+     * @throws IOException if docker command fails
+     * @throws InterruptedException if docker command fails
      */
     public Map<String, Integer> stop() throws IOException, InterruptedException {
         dockerManager.stopAutoScale();

@@ -17,6 +17,9 @@ import java.util.stream.IntStream;
  */
 public class Application {
 
+    /**
+     * Application view for json print.
+     */
     public interface View {
          interface OnStart {}
          interface OnListAndStop extends OnStart {}

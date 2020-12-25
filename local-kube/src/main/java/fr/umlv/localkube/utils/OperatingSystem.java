@@ -15,6 +15,7 @@ public interface OperatingSystem {
     /**
      * Returns a string containing an option for docker run command according to the OS.
      *
+     * @param option option name
      * @return the resulting string
      */
     default String getHostOption(String option) {

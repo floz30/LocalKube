@@ -37,6 +37,9 @@ public interface LogRepository {
 
     /**
      * Saves a given log.
+     * @param app_id application id
+     * @param message log message
+     * @param timestamp creation timestamp
      */
     @SqlUpdate("INSERT INTO log(app_id, message, timestamp) VALUES (?, ?, ?)")
     void save(int app_id, String message, Instant timestamp);

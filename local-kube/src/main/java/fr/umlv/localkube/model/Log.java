@@ -40,6 +40,9 @@ public record Log(@JsonProperty("id") @ColumnName("id") int id,
         Objects.requireNonNull(timestamp);
     }
 
+    /**
+     * Specific Mapper for application log
+     */
     public static class LogMapper implements RowMapper<Log> {
 
         private final ApplicationRepository applicationRepository;

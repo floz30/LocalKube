@@ -33,11 +33,14 @@ public class DockerManager {
     /* Public methods */
 
     /**
-     * Counts all services are running in the swarm.
+     * Counts all services running in the swarm.
      * <p>
      * Call {@code docker service ls} command.
      *
      * @param name the service name to search
+     * @return the number of task running
+     * @throws IOException if docker command fails
+     * @throws InterruptedException if docker command fails
      */
     public int countRunningTasks(String name) throws IOException, InterruptedException {
         var lsCommand = new ProcessBuilder()

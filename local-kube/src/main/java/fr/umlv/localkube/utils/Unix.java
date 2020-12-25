@@ -1,5 +1,8 @@
 package fr.umlv.localkube.utils;
 
+/**
+ * Unix operating system.
+ */
 public class Unix implements OperatingSystem {
 
     @Override

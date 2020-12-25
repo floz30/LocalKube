@@ -38,6 +38,7 @@ public class ApplicationService {
      * Start a given application.
      *
      * @param app the application to start
+     * @param numberOfInstance number of instance to run
      * @return the launched application
      * @throws IOException                     if an I/O exception occurs
      * @throws InvalidImageReferenceException  when attempting to parse an invalid image reference
