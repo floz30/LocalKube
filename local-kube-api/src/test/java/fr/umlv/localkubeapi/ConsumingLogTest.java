@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ConsumingLogTest {
 
@@ -18,7 +17,7 @@ public class ConsumingLogTest {
 
     @Test
     void shouldNotFailOnValidRange() {
-        IntStream.range(49152, 65535).forEach(ConsumingLog::new);
+        assertDoesNotThrow(() -> IntStream.range(49152, 65535).forEach(ConsumingLog::new));
     }
 
     @Test

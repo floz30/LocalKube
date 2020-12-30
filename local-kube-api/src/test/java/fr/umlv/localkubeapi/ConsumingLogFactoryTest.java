@@ -17,7 +17,7 @@ public class ConsumingLogFactoryTest {
 
     @Test
     void createShouldNotFailOnValidRange() {
-        IntStream.range(49152, 65535).forEach(i -> new ConsumingLogFactory().create(i));
+        assertDoesNotThrow(() -> IntStream.range(49152, 65535).forEach(i -> new ConsumingLogFactory().create(i)));
     }
 
     @Test
