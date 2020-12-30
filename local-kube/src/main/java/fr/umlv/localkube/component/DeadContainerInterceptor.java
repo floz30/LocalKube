@@ -2,7 +2,6 @@ package fr.umlv.localkube.component;
 
 import fr.umlv.localkube.services.ApplicationService;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 

@@ -83,6 +83,7 @@ public class AutoScaleService {
      */
     public Map<String, String> update(Map<String, Integer> params) throws IOException, InterruptedException {
         var actualInstances = instances;
+        checkPositiveNumberInstances(params);
         this.instances = params;
         var output = statusOutput(actualInstances);
         dockerManager.startAutoScale();
@@ -93,6 +94,12 @@ public class AutoScaleService {
 
     /* Private methods */
 
+
+    private void checkPositiveNumberInstances(Map<String, Integer> data){
+        if(data.values().stream().anyMatch(i -> i<0)){
+            throw new IllegalArgumentException("Cannot scale an application with negative number of instances");
+        }
+    }
 
     /**
      * Checks if application name has a correct format.

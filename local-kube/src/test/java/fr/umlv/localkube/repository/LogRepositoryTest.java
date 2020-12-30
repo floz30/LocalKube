@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @TestPropertySource(locations="classpath:test.properties")
 public class LogRepositoryTest {
 
@@ -28,7 +28,6 @@ public class LogRepositoryTest {
 
     @Autowired
     private ApplicationRepository applicationRepository;
-
 
     @BeforeEach
     void initApplicationRepository(){
